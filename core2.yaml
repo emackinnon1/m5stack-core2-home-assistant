@@ -1,0 +1,30 @@
+substitutions:
+  devicename: m5core2
+  friendly_name: M5Core2
+
+  # up to 6 lights; leave a slot's name blank to hide it from the remote
+  core2_light1_entity: "light.core2_unused_1"
+  core2_light1_name: ""
+  core2_light2_entity: "light.core2_unused_2"
+  core2_light2_name: ""
+  core2_light3_entity: "light.core2_unused_3"
+  core2_light3_name: ""
+  core2_light4_entity: "light.core2_unused_4"
+  core2_light4_name: ""
+  core2_light5_entity: "light.core2_unused_5"
+  core2_light5_name: ""
+  core2_light6_entity: "light.core2_unused_6"
+  core2_light6_name: ""
+
+esphome:
+  name: ${devicename}
+  friendly_name: ${friendly_name}
+  libraries:
+    - Wire
+
+packages:
+  hardware: !include src/main/hardware.yaml
+  network: !include src/main/network.yaml
+  lights_backend: !include src/main/lights.yaml
+  lights_ui: !include src/pages/lights.yaml
+

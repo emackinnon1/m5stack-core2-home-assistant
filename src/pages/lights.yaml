@@ -1,0 +1,122 @@
+display:
+  - id: !extend core2_display
+    lambda: |-
+      it.fill(Color(0, 0, 0));
+      bool is_on[6];
+      is_on[0] = id(core2_light1_state).state == "on";
+      is_on[1] = id(core2_light2_state).state == "on";
+      is_on[2] = id(core2_light3_state).state == "on";
+      is_on[3] = id(core2_light4_state).state == "on";
+      is_on[4] = id(core2_light5_state).state == "on";
+      is_on[5] = id(core2_light6_state).state == "on";
+
+      bool any_light = false;
+      int row = 0;
+      for (int i = 0; i < 6; i++) {
+        if (id(core2_light_names)[i].empty()) continue;
+        any_light = true;
+        bool selected = (id(core2_light_index) == i);
+        int y = 4 + row * 40;
+        it.filled_rectangle(0, y, 320, 36, selected ? Color(0, 90, 180) : Color(40, 40, 40));
+        it.print(10, y + 8, id(roboto), is_on[i] ? Color(120, 255, 120) : Color(255, 255, 255), id(core2_light_names)[i].c_str());
+        it.print(260, y + 8, id(roboto), is_on[i] ? Color(120, 255, 120) : Color(255, 255, 255), is_on[i] ? "ON" : "OFF");
+        row++;
+      }
+      if (!any_light) {
+        it.print(10, 10, id(roboto), Color(255, 255, 255), "No lights configured");
+      }
+
+touchscreen:
+  - id: !extend core2_touchscreen
+    on_touch:
+      - lambda: |-
+          int ty = touch.y;
+          if (ty < 0 || ty >= 240) return;
+          int tapped_row = ty / 40;
+          int target = -1;
+          int row = -1;
+          for (int i = 0; i < 6; i++) {
+            if (id(core2_light_names)[i].empty()) continue;
+            row++;
+            if (row == tapped_row) {
+              target = i;
+              break;
+            }
+          }
+          if (target < 0) return;
+          id(core2_light_index) = target;
+          switch (target) {
+            case 0: id(core2_toggle_light1)->execute(); break;
+            case 1: id(core2_toggle_light2)->execute(); break;
+            case 2: id(core2_toggle_light3)->execute(); break;
+            case 3: id(core2_toggle_light4)->execute(); break;
+            case 4: id(core2_toggle_light5)->execute(); break;
+            case 5: id(core2_toggle_light6)->execute(); break;
+            default: break;
+          }
+
+
+# virtual buttons in the capacitive strip below the visible screen
+binary_sensor:
+  - platform: touchscreen
+    id: core2_button_a
+    internal: true
+    x_min: 10
+    x_max: 120
+    y_min: 240
+    y_max: 280
+    use_raw: true
+    on_press:
+      - lambda: |-
+          int cur = id(core2_light_index);
+          for (int step = 0; step < 6; step++) {
+            cur = (cur - 1 + 6) % 6;
+            if (!id(core2_light_names)[cur].empty()) {
+              id(core2_light_index) = cur;
+              break;
+            }
+          }
+      - component.update: core2_display
+
+  - platform: touchscreen
+    id: core2_button_b
+    internal: true
+    x_min: 130
+    x_max: 200
+    y_min: 240
+    y_max: 280
+    use_raw: true
+    on_press:
+      - lambda: |-
+          int idx = id(core2_light_index);
+          if (idx < 0 || idx >= 6 || id(core2_light_names)[idx].empty()) return;
+          switch (idx) {
+            case 0: id(core2_toggle_light1)->execute(); break;
+            case 1: id(core2_toggle_light2)->execute(); break;
+            case 2: id(core2_toggle_light3)->execute(); break;
+            case 3: id(core2_toggle_light4)->execute(); break;
+            case 4: id(core2_toggle_light5)->execute(); break;
+            case 5: id(core2_toggle_light6)->execute(); break;
+            default: break;
+          }
+
+  - platform: touchscreen
+    id: core2_button_c
+    internal: true
+    x_min: 230
+    x_max: 310
+    y_min: 240
+    y_max: 280
+    use_raw: true
+    on_press:
+      - lambda: |-
+          int cur = id(core2_light_index);
+          for (int step = 0; step < 6; step++) {
+            cur = (cur + 1) % 6;
+            if (!id(core2_light_names)[cur].empty()) {
+              id(core2_light_index) = cur;
+              break;
+            }
+          }
+      - component.update: core2_display
+

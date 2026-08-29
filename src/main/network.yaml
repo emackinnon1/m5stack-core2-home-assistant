@@ -1,0 +1,25 @@
+substitutions:
+  wifi_ssid: ""
+  wifi_password: ""
+  api_encryption_key: ""
+  ota_password: ""
+  ap_fallback_password: ""
+
+logger:
+
+api:
+  encryption:
+    key: ${api_encryption_key}
+
+ota:
+  - platform: esphome
+    password: ${ota_password}
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+  ap:
+    ssid: "${friendly_name} Fallback Hotspot"
+    password: ${ap_fallback_password}
+
+captive_portal:

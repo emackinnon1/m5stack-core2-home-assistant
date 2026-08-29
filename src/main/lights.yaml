@@ -1,0 +1,76 @@
+globals:
+  - id: core2_light_index
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+  # non-empty entry = slot is configured/visible on the remote
+  - id: core2_light_names
+    type: 'std::array<std::string, 6>'
+    restore_value: false
+    initial_value: '{"${core2_light1_name}", "${core2_light2_name}", "${core2_light3_name}", "${core2_light4_name}", "${core2_light5_name}", "${core2_light6_name}"}'
+
+text_sensor:
+  - platform: homeassistant
+    id: core2_light1_state
+    entity_id: ${core2_light1_entity}
+    internal: true
+  - platform: homeassistant
+    id: core2_light2_state
+    entity_id: ${core2_light2_entity}
+    internal: true
+  - platform: homeassistant
+    id: core2_light3_state
+    entity_id: ${core2_light3_entity}
+    internal: true
+  - platform: homeassistant
+    id: core2_light4_state
+    entity_id: ${core2_light4_entity}
+    internal: true
+  - platform: homeassistant
+    id: core2_light5_state
+    entity_id: ${core2_light5_entity}
+    internal: true
+  - platform: homeassistant
+    id: core2_light6_state
+    entity_id: ${core2_light6_entity}
+    internal: true
+
+script:
+  - id: core2_toggle_light1
+    then:
+      - homeassistant.service:
+          service: light.toggle
+          data:
+            entity_id: ${core2_light1_entity}
+  - id: core2_toggle_light2
+    then:
+      - homeassistant.service:
+          service: light.toggle
+          data:
+            entity_id: ${core2_light2_entity}
+  - id: core2_toggle_light3
+    then:
+      - homeassistant.service:
+          service: light.toggle
+          data:
+            entity_id: ${core2_light3_entity}
+  - id: core2_toggle_light4
+    then:
+      - homeassistant.service:
+          service: light.toggle
+          data:
+            entity_id: ${core2_light4_entity}
+  - id: core2_toggle_light5
+    then:
+      - homeassistant.service:
+          service: light.toggle
+          data:
+            entity_id: ${core2_light5_entity}
+  - id: core2_toggle_light6
+    then:
+      - homeassistant.service:
+          service: light.toggle
+          data:
+            entity_id: ${core2_light6_entity}
+
