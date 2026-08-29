@@ -45,6 +45,11 @@ globals:
     restore_value: false
     initial_value: '24'
 
+  - id: core2_light_brightness
+    type: int
+    restore_value: false
+    initial_value: '100'
+
 text_sensor:
   - platform: homeassistant
     id: core2_light1_state
@@ -113,4 +118,15 @@ script:
             red: !lambda 'return id(core2_light_red);'
             green: !lambda 'return id(core2_light_green);'
             blue: !lambda 'return id(core2_light_blue);'
+
+  - id: core2_set_light_brightness
+    then:
+      - homeassistant.action:
+          action: light.turn_on
+          data_template:
+            entity_id: "{{ target_entity }}"
+            brightness_pct: "{{ brightness | int }}"
+          variables:
+            target_entity: !lambda 'return id(core2_active_light_entity);'
+            brightness: !lambda 'return id(core2_light_brightness);'
 
