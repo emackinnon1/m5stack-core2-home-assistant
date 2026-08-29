@@ -40,6 +40,11 @@ globals:
     restore_value: false
     initial_value: '100'
 
+  - id: core2_light_hue
+    type: int
+    restore_value: false
+    initial_value: '24'
+
 text_sensor:
   - platform: homeassistant
     id: core2_light1_state

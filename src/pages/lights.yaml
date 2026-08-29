@@ -25,10 +25,18 @@ display:
       it.image(64, 48, id(core2_light_power_icon));
 
       it.print(10, 100, id(roboto), Color(175, 175, 175), "COLOR");
-      Color presets[4] = {Color(255, 75, 75), Color(80, 200, 120), Color(70, 140, 255), Color(190, 100, 255)};
-      for (int i = 0; i < 4; i++) {
-        it.filled_rectangle(10 + i * 77, 130, 68, 32, presets[i]);
+      for (int x = 0; x < 300; x++) {
+        int hue = x * 359 / 299;
+        int segment = hue / 60;
+        int fade = hue % 60 * 255 / 59;
+        int inverse = 255 - fade;
+        int red = segment == 0 || segment == 5 ? 255 : (segment == 1 ? inverse : (segment == 4 ? fade : 0));
+        int green = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
+        int blue = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
+        it.filled_rectangle(10 + x, 130, 1, 32, Color(red, green, blue));
       }
+      int marker_x = 10 + id(core2_light_hue) * 299 / 359;
+      it.rectangle(marker_x - 2, 128, 5, 36, Color(255, 255, 255));
 
       it.filled_rectangle(10, 180, 300, 50, Color(42, 42, 46));
       it.print(22, 192, id(roboto), Color(255, 255, 255), "-");
@@ -55,12 +63,15 @@ touchscreen:
             } else {
               id(core2_turn_on_light)->execute();
             }
-          } else if (ty >= 130 && ty < 162) {
-            int preset = touch.x / 77;
-            if (preset == 0) { id(core2_light_red) = 255; id(core2_light_green) = 75; id(core2_light_blue) = 75; }
-            else if (preset == 1) { id(core2_light_red) = 80; id(core2_light_green) = 200; id(core2_light_blue) = 120; }
-            else if (preset == 2) { id(core2_light_red) = 70; id(core2_light_green) = 140; id(core2_light_blue) = 255; }
-            else { id(core2_light_red) = 190; id(core2_light_green) = 100; id(core2_light_blue) = 255; }
+          } else if (touch.x >= 10 && touch.x < 310 && ty >= 130 && ty < 162) {
+            int hue = (touch.x - 10) * 359 / 299;
+            int segment = hue / 60;
+            int fade = hue % 60 * 255 / 59;
+            int inverse = 255 - fade;
+            id(core2_light_hue) = hue;
+            id(core2_light_red) = segment == 0 || segment == 5 ? 255 : (segment == 1 ? inverse : (segment == 4 ? fade : 0));
+            id(core2_light_green) = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
+            id(core2_light_blue) = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
             id(core2_set_light_color)->execute();
           } else if (ty >= 180) {
             if (touch.x < 90) id(core2_light_kelvin) = std::max(1500, id(core2_light_kelvin) - 250);
