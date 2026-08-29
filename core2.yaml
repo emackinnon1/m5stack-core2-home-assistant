@@ -2,19 +2,20 @@ substitutions:
   devicename: m5core2
   friendly_name: M5Core2
 
-  # up to 6 lights; leave a slot's name blank to hide it from the remote
-  core2_light1_entity: "light.core2_unused_1"
-  core2_light1_name: ""
-  core2_light2_entity: "light.core2_unused_2"
-  core2_light2_name: ""
-  core2_light3_entity: "light.core2_unused_3"
-  core2_light3_name: ""
-  core2_light4_entity: "light.core2_unused_4"
-  core2_light4_name: ""
-  core2_light5_entity: "light.core2_unused_5"
-  core2_light5_name: ""
-  core2_light6_entity: "light.core2_unused_6"
-  core2_light6_name: ""
+  # Up to 6 entries, each with `name` and `entity_id` keys.
+  light_entities: []
+  core2_light1_entity: ${light_entities[0].entity_id if light_entities | length > 0 else "light.core2_unused_1"}
+  core2_light1_name: ${light_entities[0].name if light_entities | length > 0 else ""}
+  core2_light2_entity: ${light_entities[1].entity_id if light_entities | length > 1 else "light.core2_unused_2"}
+  core2_light2_name: ${light_entities[1].name if light_entities | length > 1 else ""}
+  core2_light3_entity: ${light_entities[2].entity_id if light_entities | length > 2 else "light.core2_unused_3"}
+  core2_light3_name: ${light_entities[2].name if light_entities | length > 2 else ""}
+  core2_light4_entity: ${light_entities[3].entity_id if light_entities | length > 3 else "light.core2_unused_4"}
+  core2_light4_name: ${light_entities[3].name if light_entities | length > 3 else ""}
+  core2_light5_entity: ${light_entities[4].entity_id if light_entities | length > 4 else "light.core2_unused_5"}
+  core2_light5_name: ${light_entities[4].name if light_entities | length > 4 else ""}
+  core2_light6_entity: ${light_entities[5].entity_id if light_entities | length > 5 else "light.core2_unused_6"}
+  core2_light6_name: ${light_entities[5].name if light_entities | length > 5 else ""}
 
 esphome:
   name: ${devicename}

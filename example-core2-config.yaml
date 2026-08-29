@@ -7,17 +7,17 @@ substitutions:
   api_encryption_key: !secret m5core2_api_encryption_key
   ota_password: !secret m5core2_ota_password
 
-  # configure up to 6 Home Assistant lights; leave a slot's name blank to hide it
-  core2_light1_entity: light.living_room
-  core2_light1_name: "Living Room"
-  core2_light2_entity: light.kitchen
-  core2_light2_name: "Kitchen"
-  core2_light3_entity: light.bedroom
-  core2_light3_name: "Bedroom"
+  light_entities:
+    - name: "Living Room"
+      entity_id: light.living_room
+    - name: "Kitchen"
+      entity_id: light.kitchen
+    - name: "Bedroom"
+      entity_id: light.bedroom
 
 packages:
   core2_ha:
-    url: https://github.com/<your-github-username>/m5stack-core2-home-assistant
+    url: https://github.com/emackinnon1/m5stack-core2-home-assistant
     ref: main
     files:
       - core2.yaml

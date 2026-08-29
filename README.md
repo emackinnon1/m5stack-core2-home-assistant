@@ -44,13 +44,13 @@ substitutions:
   api_encryption_key: !secret m5core2_api_encryption_key
   ota_password: !secret m5core2_ota_password
 
-  # configure up to 6 Home Assistant lights; leave a slot's name blank to hide it
-  core2_light1_entity: light.living_room
-  core2_light1_name: "Living Room"
-  core2_light2_entity: light.kitchen
-  core2_light2_name: "Kitchen"
-  core2_light3_entity: light.bedroom
-  core2_light3_name: "Bedroom"
+  light_entities:
+    - name: "Living Room"
+      entity_id: light.living_room
+    - name: "Kitchen"
+      entity_id: light.kitchen
+    - name: "Bedroom"
+      entity_id: light.bedroom
 
 packages:
   core2_ha:
@@ -81,9 +81,9 @@ files under `src/`, those are the shared package.
 
 ## Lights
 
-Up to six lights can be configured through the `core2_lightN_entity` /
-`core2_lightN_name` substitution pairs (`N` from 1 to 6). A slot with an
-empty `core2_lightN_name` is hidden from the remote.
+Configure up to six lights through the `light_entities` list. Each entry
+requires a display `name` and Home Assistant `entity_id`; shorter lists leave
+the remaining rows hidden.
 
 Each configured light gets a row on the screen showing its name and current
 on/off state (read live from Home Assistant).
