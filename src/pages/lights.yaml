@@ -19,7 +19,11 @@ display:
       Color accent = is_on[index] ? Color(255, 196, 60) : Color(95, 95, 95);
       it.filled_rectangle(0, 0, 320, 32, Color(28, 28, 32));
       it.print(10, 4, id(roboto), Color(255, 255, 255), id(core2_light_names)[index].c_str());
-      it.print(266, 4, id(roboto), accent, is_on[index] ? "ON" : "OFF");
+      if (isnan(id(core2_battery_level).state)) {
+        it.print(270, 4, id(roboto), Color(175, 175, 175), "--%");
+      } else {
+        it.printf(260, 4, id(roboto), Color(175, 175, 175), "%.0f%%", id(core2_battery_level).state);
+      }
 
       it.filled_rectangle(13, 45, 72, 48, Color(16, 16, 18));
       it.filled_rectangle(10, 42, 72, 48, is_on[index] ? Color(82, 60, 22) : Color(48, 48, 52));

@@ -43,6 +43,7 @@ sensor:
     i2c_id: bus_a
     update_interval: 30s
     battery_level:
+      id: core2_battery_level
       name: "${friendly_name} Battery Level"
 
 display:
