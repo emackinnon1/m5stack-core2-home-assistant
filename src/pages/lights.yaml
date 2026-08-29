@@ -21,9 +21,9 @@ display:
       it.print(10, 4, id(roboto), Color(255, 255, 255), id(core2_light_names)[index].c_str());
       it.print(266, 4, id(roboto), accent, is_on[index] ? "ON" : "OFF");
 
-      it.filled_rectangle(10, 42, 300, 48, is_on[index] ? Color(130, 94, 20) : Color(48, 48, 52));
-      it.image(118, 46, id(core2_light_power_icon));
-      it.print(164, 53, id(roboto), Color(255, 255, 255), is_on[index] ? "TURN OFF" : "TURN ON");
+      it.filled_rectangle(10, 42, 144, 48, is_on[index] ? Color(130, 94, 20) : Color(48, 48, 52));
+      it.image(20, 46, id(core2_light_power_icon));
+      it.print(64, 53, id(roboto), Color(255, 255, 255), is_on[index] ? "TURN OFF" : "TURN ON");
 
       it.print(10, 100, id(roboto), Color(175, 175, 175), "COLOR");
       Color presets[4] = {Color(255, 75, 75), Color(80, 200, 120), Color(70, 140, 255), Color(190, 100, 255)};
@@ -45,7 +45,7 @@ touchscreen:
           id(core2_active_light_entity) = id(core2_light_entities)[index];
           int ty = touch.y;
           if (ty < 0 || ty >= 240) return;
-          if (ty >= 42 && ty < 90) {
+          if (touch.x >= 10 && touch.x < 154 && ty >= 42 && ty < 90) {
             if (index == 0 ? id(core2_light1_state).state == "on" :
                 index == 1 ? id(core2_light2_state).state == "on" :
                 index == 2 ? id(core2_light3_state).state == "on" :

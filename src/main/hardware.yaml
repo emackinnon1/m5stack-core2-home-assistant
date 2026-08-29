@@ -27,7 +27,8 @@ font:
     size: 24
 
 image:
-  - file: src/assets/images/light.png
+  - platform: file
+    file: src/assets/images/light.png
     id: core2_light_power_icon
     type: RGB565
     transparency: alpha_channel
