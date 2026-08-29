@@ -38,10 +38,16 @@ display:
       int marker_x = 10 + id(core2_light_hue) * 299 / 359;
       it.rectangle(marker_x - 2, 128, 5, 36, Color(255, 255, 255));
 
-      it.filled_rectangle(10, 180, 300, 50, Color(42, 42, 46));
-      it.print(22, 192, id(roboto), Color(255, 255, 255), "-");
-      it.printf(112, 192, id(roboto), Color(255, 220, 140), "%dK", id(core2_light_kelvin));
-      it.print(276, 192, id(roboto), Color(255, 255, 255), "+");
+      it.printf(10, 166, id(roboto), Color(175, 175, 175), "KELVIN  %dK", id(core2_light_kelvin));
+      for (int x = 0; x < 300; x++) {
+        int coolness = x * 255 / 299;
+        int red = 255 - coolness * 65 / 255;
+        int green = 126 + coolness * 94 / 255;
+        int blue = 42 + coolness * 213 / 255;
+        it.filled_rectangle(10 + x, 198, 1, 32, Color(red, green, blue));
+      }
+      int kelvin_marker_x = 10 + (id(core2_light_kelvin) - 1500) * 299 / 5000;
+      it.rectangle(kelvin_marker_x - 2, 196, 5, 36, Color(255, 255, 255));
 
 touchscreen:
   - id: !extend core2_touchscreen
@@ -73,9 +79,8 @@ touchscreen:
             id(core2_light_green) = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
             id(core2_light_blue) = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
             id(core2_set_light_color)->execute();
-          } else if (ty >= 180) {
-            if (touch.x < 90) id(core2_light_kelvin) = std::max(1500, id(core2_light_kelvin) - 250);
-            else if (touch.x > 230) id(core2_light_kelvin) = std::min(6500, id(core2_light_kelvin) + 250);
+          } else if (touch.x >= 10 && touch.x < 310 && ty >= 198 && ty < 230) {
+            id(core2_light_kelvin) = 1500 + (touch.x - 10) * 5000 / 299;
             id(core2_set_light_kelvin)->execute();
           }
           id(core2_display)->update();
