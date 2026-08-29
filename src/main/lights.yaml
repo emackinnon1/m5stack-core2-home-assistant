@@ -130,3 +130,15 @@ script:
             target_entity: !lambda 'return id(core2_active_light_entity);'
             brightness: !lambda 'return id(core2_light_brightness);'
 
+  - id: core2_refresh_light_state
+    mode: restart
+    then:
+      - homeassistant.action:
+          action: homeassistant.update_entity
+          data_template:
+            entity_id: "{{ target_entity }}"
+          variables:
+            target_entity: !lambda 'return id(core2_active_light_entity);'
+      - delay: 300ms
+      - component.update: core2_display
+

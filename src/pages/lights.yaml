@@ -118,6 +118,7 @@ binary_sensor:
           }
           id(core2_active_light_entity) = id(core2_light_entities)[id(core2_light_index)];
       - component.update: core2_display
+      - script.execute: core2_refresh_light_state
 
   - platform: touchscreen
     id: core2_button_b
@@ -163,4 +164,5 @@ binary_sensor:
           }
           id(core2_active_light_entity) = id(core2_light_entities)[id(core2_light_index)];
       - component.update: core2_display
+      - script.execute: core2_refresh_light_state
 
