@@ -10,6 +10,36 @@ globals:
     restore_value: false
     initial_value: '{"${core2_light1_name}", "${core2_light2_name}", "${core2_light3_name}", "${core2_light4_name}", "${core2_light5_name}", "${core2_light6_name}"}'
 
+  - id: core2_light_entities
+    type: 'std::array<std::string, 6>'
+    restore_value: false
+    initial_value: '{"${core2_light1_entity}", "${core2_light2_entity}", "${core2_light3_entity}", "${core2_light4_entity}", "${core2_light5_entity}", "${core2_light6_entity}"}'
+
+  - id: core2_active_light_entity
+    type: std::string
+    restore_value: false
+    initial_value: '"${core2_light1_entity}"'
+
+  - id: core2_light_kelvin
+    type: int
+    restore_value: false
+    initial_value: '4000'
+
+  - id: core2_light_red
+    type: int
+    restore_value: false
+    initial_value: '255'
+
+  - id: core2_light_green
+    type: int
+    restore_value: false
+    initial_value: '180'
+
+  - id: core2_light_blue
+    type: int
+    restore_value: false
+    initial_value: '100'
+
 text_sensor:
   - platform: homeassistant
     id: core2_light1_state
@@ -37,40 +67,45 @@ text_sensor:
     internal: true
 
 script:
-  - id: core2_toggle_light1
+  - id: core2_turn_on_light
     then:
-      - homeassistant.service:
-          service: light.toggle
-          data:
-            entity_id: ${core2_light1_entity}
-  - id: core2_toggle_light2
+      - homeassistant.action:
+          action: light.turn_on
+          data_template:
+            entity_id: "{{ target_entity }}"
+          variables:
+            target_entity: !lambda 'return id(core2_active_light_entity);'
+
+  - id: core2_turn_off_light
     then:
-      - homeassistant.service:
-          service: light.toggle
-          data:
-            entity_id: ${core2_light2_entity}
-  - id: core2_toggle_light3
+      - homeassistant.action:
+          action: light.turn_off
+          data_template:
+            entity_id: "{{ target_entity }}"
+          variables:
+            target_entity: !lambda 'return id(core2_active_light_entity);'
+
+  - id: core2_set_light_kelvin
     then:
-      - homeassistant.service:
-          service: light.toggle
-          data:
-            entity_id: ${core2_light3_entity}
-  - id: core2_toggle_light4
+      - homeassistant.action:
+          action: light.turn_on
+          data_template:
+            entity_id: "{{ target_entity }}"
+            color_temp_kelvin: "{{ kelvin | int }}"
+          variables:
+            target_entity: !lambda 'return id(core2_active_light_entity);'
+            kelvin: !lambda 'return id(core2_light_kelvin);'
+
+  - id: core2_set_light_color
     then:
-      - homeassistant.service:
-          service: light.toggle
-          data:
-            entity_id: ${core2_light4_entity}
-  - id: core2_toggle_light5
-    then:
-      - homeassistant.service:
-          service: light.toggle
-          data:
-            entity_id: ${core2_light5_entity}
-  - id: core2_toggle_light6
-    then:
-      - homeassistant.service:
-          service: light.toggle
-          data:
-            entity_id: ${core2_light6_entity}
+      - homeassistant.action:
+          action: light.turn_on
+          data_template:
+            entity_id: "{{ target_entity }}"
+            rgb_color: "[{{ red | int }}, {{ green | int }}, {{ blue | int }}]"
+          variables:
+            target_entity: !lambda 'return id(core2_active_light_entity);'
+            red: !lambda 'return id(core2_light_red);'
+            green: !lambda 'return id(core2_light_green);'
+            blue: !lambda 'return id(core2_light_blue);'
 

@@ -10,50 +10,64 @@ display:
       is_on[4] = id(core2_light5_state).state == "on";
       is_on[5] = id(core2_light6_state).state == "on";
 
-      bool any_light = false;
-      int row = 0;
-      for (int i = 0; i < 6; i++) {
-        if (id(core2_light_names)[i].empty()) continue;
-        any_light = true;
-        bool selected = (id(core2_light_index) == i);
-        int y = 4 + row * 40;
-        it.filled_rectangle(0, y, 320, 36, selected ? Color(0, 90, 180) : Color(40, 40, 40));
-        it.print(10, y + 8, id(roboto), is_on[i] ? Color(120, 255, 120) : Color(255, 255, 255), id(core2_light_names)[i].c_str());
-        it.print(260, y + 8, id(roboto), is_on[i] ? Color(120, 255, 120) : Color(255, 255, 255), is_on[i] ? "ON" : "OFF");
-        row++;
-      }
-      if (!any_light) {
+      int index = id(core2_light_index);
+      if (index < 0 || index >= 6 || id(core2_light_names)[index].empty()) {
         it.print(10, 10, id(roboto), Color(255, 255, 255), "No lights configured");
+        return;
       }
+
+      Color accent = is_on[index] ? Color(255, 196, 60) : Color(95, 95, 95);
+      it.filled_rectangle(0, 0, 320, 32, Color(28, 28, 32));
+      it.print(10, 4, id(roboto), Color(255, 255, 255), id(core2_light_names)[index].c_str());
+      it.print(266, 4, id(roboto), accent, is_on[index] ? "ON" : "OFF");
+
+      it.filled_rectangle(10, 42, 300, 48, is_on[index] ? Color(130, 94, 20) : Color(48, 48, 52));
+      it.print(108, 53, id(roboto), Color(255, 255, 255), is_on[index] ? "TURN OFF" : "TURN ON");
+
+      it.print(10, 100, id(roboto), Color(175, 175, 175), "COLOR");
+      Color presets[4] = {Color(255, 75, 75), Color(80, 200, 120), Color(70, 140, 255), Color(190, 100, 255)};
+      for (int i = 0; i < 4; i++) {
+        it.filled_rectangle(10 + i * 77, 130, 68, 32, presets[i]);
+      }
+
+      it.filled_rectangle(10, 180, 300, 50, Color(42, 42, 46));
+      it.print(22, 192, id(roboto), Color(255, 255, 255), "-");
+      it.printf(112, 192, id(roboto), Color(255, 220, 140), "%dK", id(core2_light_kelvin));
+      it.print(276, 192, id(roboto), Color(255, 255, 255), "+");
 
 touchscreen:
   - id: !extend core2_touchscreen
     on_touch:
       - lambda: |-
+          int index = id(core2_light_index);
+          if (index < 0 || index >= 6 || id(core2_light_names)[index].empty()) return;
+          id(core2_active_light_entity) = id(core2_light_entities)[index];
           int ty = touch.y;
           if (ty < 0 || ty >= 240) return;
-          int tapped_row = ty / 40;
-          int target = -1;
-          int row = -1;
-          for (int i = 0; i < 6; i++) {
-            if (id(core2_light_names)[i].empty()) continue;
-            row++;
-            if (row == tapped_row) {
-              target = i;
-              break;
+          if (ty >= 42 && ty < 90) {
+            if (index == 0 ? id(core2_light1_state).state == "on" :
+                index == 1 ? id(core2_light2_state).state == "on" :
+                index == 2 ? id(core2_light3_state).state == "on" :
+                index == 3 ? id(core2_light4_state).state == "on" :
+                index == 4 ? id(core2_light5_state).state == "on" :
+                             id(core2_light6_state).state == "on") {
+              id(core2_turn_off_light)->execute();
+            } else {
+              id(core2_turn_on_light)->execute();
             }
+          } else if (ty >= 130 && ty < 162) {
+            int preset = touch.x / 77;
+            if (preset == 0) { id(core2_light_red) = 255; id(core2_light_green) = 75; id(core2_light_blue) = 75; }
+            else if (preset == 1) { id(core2_light_red) = 80; id(core2_light_green) = 200; id(core2_light_blue) = 120; }
+            else if (preset == 2) { id(core2_light_red) = 70; id(core2_light_green) = 140; id(core2_light_blue) = 255; }
+            else { id(core2_light_red) = 190; id(core2_light_green) = 100; id(core2_light_blue) = 255; }
+            id(core2_set_light_color)->execute();
+          } else if (ty >= 180) {
+            if (touch.x < 90) id(core2_light_kelvin) = std::max(1500, id(core2_light_kelvin) - 250);
+            else if (touch.x > 230) id(core2_light_kelvin) = std::min(6500, id(core2_light_kelvin) + 250);
+            id(core2_set_light_kelvin)->execute();
           }
-          if (target < 0) return;
-          id(core2_light_index) = target;
-          switch (target) {
-            case 0: id(core2_toggle_light1)->execute(); break;
-            case 1: id(core2_toggle_light2)->execute(); break;
-            case 2: id(core2_toggle_light3)->execute(); break;
-            case 3: id(core2_toggle_light4)->execute(); break;
-            case 4: id(core2_toggle_light5)->execute(); break;
-            case 5: id(core2_toggle_light6)->execute(); break;
-            default: break;
-          }
+          id(core2_display)->update();
 
 
 # virtual buttons in the capacitive strip below the visible screen
@@ -76,6 +90,7 @@ binary_sensor:
               break;
             }
           }
+          id(core2_active_light_entity) = id(core2_light_entities)[id(core2_light_index)];
       - component.update: core2_display
 
   - platform: touchscreen
@@ -90,14 +105,16 @@ binary_sensor:
       - lambda: |-
           int idx = id(core2_light_index);
           if (idx < 0 || idx >= 6 || id(core2_light_names)[idx].empty()) return;
-          switch (idx) {
-            case 0: id(core2_toggle_light1)->execute(); break;
-            case 1: id(core2_toggle_light2)->execute(); break;
-            case 2: id(core2_toggle_light3)->execute(); break;
-            case 3: id(core2_toggle_light4)->execute(); break;
-            case 4: id(core2_toggle_light5)->execute(); break;
-            case 5: id(core2_toggle_light6)->execute(); break;
-            default: break;
+          id(core2_active_light_entity) = id(core2_light_entities)[idx];
+          if (idx == 0 ? id(core2_light1_state).state == "on" :
+              idx == 1 ? id(core2_light2_state).state == "on" :
+              idx == 2 ? id(core2_light3_state).state == "on" :
+              idx == 3 ? id(core2_light4_state).state == "on" :
+              idx == 4 ? id(core2_light5_state).state == "on" :
+                         id(core2_light6_state).state == "on") {
+            id(core2_turn_off_light)->execute();
+          } else {
+            id(core2_turn_on_light)->execute();
           }
 
   - platform: touchscreen
@@ -118,5 +135,6 @@ binary_sensor:
               break;
             }
           }
+          id(core2_active_light_entity) = id(core2_light_entities)[id(core2_light_index)];
       - component.update: core2_display
 

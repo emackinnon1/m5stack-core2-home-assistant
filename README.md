@@ -86,7 +86,9 @@ requires a display `name` and Home Assistant `entity_id`; shorter lists leave
 the remaining rows hidden.
 
 Each configured light gets a row on the screen showing its name and current
-on/off state (read live from Home Assistant).
+on/off state (read live from Home Assistant). The selected light has a detail
+view with an on/off control, four RGB color presets, and a 1500K-6500K color
+temperature stepper. Color and temperature commands turn the light on.
 
 ## Navigation
 
@@ -96,7 +98,9 @@ Core2).
 
 | Control | Action |
 | --- | --- |
-| Touch a light row | Selects and toggles that light |
+| On-screen power tile | Turns the selected light on or off |
+| On-screen color swatches | Applies an RGB color preset |
+| On-screen kelvin stepper | Adjusts and applies color temperature |
 | Button A (left) | Move selection to the previous light |
 | Button B (middle) | Toggle the currently selected light |
 | Button C (right) | Move selection to the next light |
