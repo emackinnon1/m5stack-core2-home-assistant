@@ -41,7 +41,7 @@ display:
   - id: !extend core2_display
     lambda: |-
       static const int HEADER_H = 32;
-      static const int ROW_H = 54;
+      static const int ROW_H = 41;
 
       it.fill(Color(0, 0, 0));
       it.filled_rectangle(0, 0, 320, HEADER_H, Color(28, 28, 32));
@@ -99,13 +99,13 @@ display:
           const Color accent = is_on ? Color(255, 196, 60) : Color(105, 105, 110);
           it.filled_rectangle(10, row_y + 4, 300, ROW_H - 8, row_bg);
           it.rectangle(10, row_y + 4, 300, ROW_H - 8, accent);
-          it.print(24, row_y + 6, id(roboto_small), Color(255, 255, 255), id(core2_light_names)[i].c_str());
+          it.print(24, row_y + 8, id(roboto_small), Color(255, 255, 255), id(core2_light_names)[i].c_str());
 
           if (is_on && !isnan(bright_raw)) {
             const int pct = (int) (bright_raw * 100.0f / 255.0f + 0.5f);
-            it.printf(24, row_y + 28, id(roboto_small), Color(175, 175, 175), "ON  %d%%", pct);
+            it.printf(296, row_y + 8, id(roboto_small), Color(175, 175, 175), TextAlign::TOP_RIGHT, "ON  %d%%", pct);
           } else {
-            it.print(24, row_y + 28, id(roboto_small), Color(175, 175, 175), is_on ? "ON" : "OFF");
+            it.print(296, row_y + 8, id(roboto_small), Color(175, 175, 175), TextAlign::TOP_RIGHT, is_on ? "ON" : "OFF");
           }
         }
 
@@ -221,7 +221,7 @@ touchscreen:
 
           int visible_count = 0;
           for (int i = 0; i < 6; i++) if (!id(core2_light_names)[i].empty()) visible_count++;
-          const int content_h = visible_count * 54;
+          const int content_h = visible_count * 41;
           const int max_scroll = std::max(0, content_h - (240 - 32));
 
           int new_scroll = id(core2_selector_touch_start_scroll) + delta;
@@ -240,7 +240,7 @@ touchscreen:
           if (!id(core2_selector_drag_moved)) {
             const int content_y = id(core2_selector_touch_start_y) + id(core2_selector_scroll_y) - 32;
             if (content_y >= 0) {
-              const int row_slot = content_y / 54;
+              const int row_slot = content_y / 41;
               int slot = 0;
               for (int i = 0; i < 6; i++) {
                 if (id(core2_light_names)[i].empty()) continue;
@@ -268,7 +268,7 @@ binary_sensor:
     on_press:
       - lambda: |-
           if (id(core2_page) == 0) {
-            int new_scroll = id(core2_selector_scroll_y) - 54;
+            int new_scroll = id(core2_selector_scroll_y) - 41;
             if (new_scroll < 0) new_scroll = 0;
             id(core2_selector_scroll_y) = new_scroll;
           } else {
@@ -290,7 +290,7 @@ binary_sensor:
             int visible_count = 0;
             for (int i = 0; i < 6; i++) if (!id(core2_light_names)[i].empty()) visible_count++;
             if (visible_count == 0) return;
-            const int row_slot = id(core2_selector_scroll_y) / 54;
+            const int row_slot = id(core2_selector_scroll_y) / 41;
             int slot = 0;
             for (int i = 0; i < 6; i++) {
               if (id(core2_light_names)[i].empty()) continue;
@@ -336,8 +336,8 @@ binary_sensor:
           if (id(core2_page) == 0) {
             int visible_count = 0;
             for (int i = 0; i < 6; i++) if (!id(core2_light_names)[i].empty()) visible_count++;
-            const int max_scroll = std::max(0, visible_count * 54 - (240 - 32));
-            int new_scroll = id(core2_selector_scroll_y) + 54;
+            const int max_scroll = std::max(0, visible_count * 41 - (240 - 32));
+            int new_scroll = id(core2_selector_scroll_y) + 41;
             if (new_scroll > max_scroll) new_scroll = max_scroll;
             id(core2_selector_scroll_y) = new_scroll;
           } else {
