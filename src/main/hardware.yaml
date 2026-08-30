@@ -26,6 +26,14 @@ font:
     id: roboto
     size: 24
 
+image:
+  - platform: file
+    file: src/assets/images/light.png
+    id: core2_light_power_icon
+    type: RGB565
+    transparency: alpha_channel
+    resize: 36x36
+
 # powers the display/backlight rails and exposes the battery level
 sensor:
   - platform: axp192
@@ -35,6 +43,7 @@ sensor:
     i2c_id: bus_a
     update_interval: 30s
     battery_level:
+      id: core2_battery_level
       name: "${friendly_name} Battery Level"
 
 display:

@@ -19,21 +19,52 @@ display:
       Color accent = is_on[index] ? Color(255, 196, 60) : Color(95, 95, 95);
       it.filled_rectangle(0, 0, 320, 32, Color(28, 28, 32));
       it.print(10, 4, id(roboto), Color(255, 255, 255), id(core2_light_names)[index].c_str());
-      it.print(266, 4, id(roboto), accent, is_on[index] ? "ON" : "OFF");
-
-      it.filled_rectangle(10, 42, 300, 48, is_on[index] ? Color(130, 94, 20) : Color(48, 48, 52));
-      it.print(108, 53, id(roboto), Color(255, 255, 255), is_on[index] ? "TURN OFF" : "TURN ON");
-
-      it.print(10, 100, id(roboto), Color(175, 175, 175), "COLOR");
-      Color presets[4] = {Color(255, 75, 75), Color(80, 200, 120), Color(70, 140, 255), Color(190, 100, 255)};
-      for (int i = 0; i < 4; i++) {
-        it.filled_rectangle(10 + i * 77, 130, 68, 32, presets[i]);
+      it.rectangle(240, 10, 14, 10, Color(175, 175, 175));
+      it.filled_rectangle(254, 13, 3, 4, Color(175, 175, 175));
+      if (!isnan(id(core2_battery_level).state)) {
+        int battery_fill = std::max(1, std::min(11, (int) (id(core2_battery_level).state * 11 / 100)));
+        it.filled_rectangle(241, 11, battery_fill, 8, Color(255, 196, 60));
+      }
+      if (isnan(id(core2_battery_level).state)) {
+        it.print(270, 4, id(roboto), Color(175, 175, 175), "--%");
+      } else {
+        it.printf(260, 4, id(roboto), Color(175, 175, 175), "%.0f%%", id(core2_battery_level).state);
       }
 
-      it.filled_rectangle(10, 180, 300, 50, Color(42, 42, 46));
-      it.print(22, 192, id(roboto), Color(255, 255, 255), "-");
-      it.printf(112, 192, id(roboto), Color(255, 220, 140), "%dK", id(core2_light_kelvin));
-      it.print(276, 192, id(roboto), Color(255, 255, 255), "+");
+      it.filled_rectangle(13, 45, 72, 48, Color(16, 16, 18));
+      it.filled_rectangle(10, 42, 72, 48, is_on[index] ? Color(82, 60, 22) : Color(48, 48, 52));
+      it.rectangle(10, 42, 72, 48, is_on[index] ? Color(255, 196, 60) : Color(105, 105, 110));
+      it.image(28, 48, id(core2_light_power_icon));
+      it.printf(100, 43, id(roboto), Color(175, 175, 175), "BRIGHT %d%%", id(core2_light_brightness));
+      it.filled_rectangle(100, 76, 200, 8, Color(48, 48, 52));
+      it.filled_rectangle(100, 76, id(core2_light_brightness) * 200 / 100, 8, accent);
+      int brightness_x = 100 + id(core2_light_brightness) * 200 / 100;
+      it.filled_circle(brightness_x, 80, 7, Color(255, 255, 255));
+
+      it.print(10, 100, id(roboto), Color(175, 175, 175), "COLOR");
+      for (int x = 0; x < 300; x++) {
+        int hue = x * 359 / 299;
+        int segment = hue / 60;
+        int fade = hue % 60 * 255 / 59;
+        int inverse = 255 - fade;
+        int red = segment == 0 || segment == 5 ? 255 : (segment == 1 ? inverse : (segment == 4 ? fade : 0));
+        int green = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
+        int blue = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
+        it.filled_rectangle(10 + x, 130, 1, 32, Color(red, green, blue));
+      }
+      int marker_x = 10 + id(core2_light_hue) * 299 / 359;
+      it.rectangle(marker_x - 2, 128, 5, 36, Color(255, 255, 255));
+
+      it.printf(10, 166, id(roboto), Color(175, 175, 175), "KELVIN  %dK", id(core2_light_kelvin));
+      for (int x = 0; x < 300; x++) {
+        int coolness = x * 255 / 299;
+        int red = 255 - coolness * 65 / 255;
+        int green = 126 + coolness * 94 / 255;
+        int blue = 42 + coolness * 213 / 255;
+        it.filled_rectangle(10 + x, 198, 1, 32, Color(red, green, blue));
+      }
+      int kelvin_marker_x = 10 + (id(core2_light_kelvin) - 1500) * 299 / 5000;
+      it.rectangle(kelvin_marker_x - 2, 196, 5, 36, Color(255, 255, 255));
 
 touchscreen:
   - id: !extend core2_touchscreen
@@ -44,7 +75,7 @@ touchscreen:
           id(core2_active_light_entity) = id(core2_light_entities)[index];
           int ty = touch.y;
           if (ty < 0 || ty >= 240) return;
-          if (ty >= 42 && ty < 90) {
+          if (touch.x >= 10 && touch.x < 82 && ty >= 42 && ty < 90) {
             if (index == 0 ? id(core2_light1_state).state == "on" :
                 index == 1 ? id(core2_light2_state).state == "on" :
                 index == 2 ? id(core2_light3_state).state == "on" :
@@ -55,17 +86,22 @@ touchscreen:
             } else {
               id(core2_turn_on_light)->execute();
             }
-          } else if (ty >= 130 && ty < 162) {
-            int preset = touch.x / 77;
-            if (preset == 0) { id(core2_light_red) = 255; id(core2_light_green) = 75; id(core2_light_blue) = 75; }
-            else if (preset == 1) { id(core2_light_red) = 80; id(core2_light_green) = 200; id(core2_light_blue) = 120; }
-            else if (preset == 2) { id(core2_light_red) = 70; id(core2_light_green) = 140; id(core2_light_blue) = 255; }
-            else { id(core2_light_red) = 190; id(core2_light_green) = 100; id(core2_light_blue) = 255; }
+          } else if (touch.x >= 10 && touch.x < 310 && ty >= 130 && ty < 162) {
+            int hue = (touch.x - 10) * 359 / 299;
+            int segment = hue / 60;
+            int fade = hue % 60 * 255 / 59;
+            int inverse = 255 - fade;
+            id(core2_light_hue) = hue;
+            id(core2_light_red) = segment == 0 || segment == 5 ? 255 : (segment == 1 ? inverse : (segment == 4 ? fade : 0));
+            id(core2_light_green) = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
+            id(core2_light_blue) = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
             id(core2_set_light_color)->execute();
-          } else if (ty >= 180) {
-            if (touch.x < 90) id(core2_light_kelvin) = std::max(1500, id(core2_light_kelvin) - 250);
-            else if (touch.x > 230) id(core2_light_kelvin) = std::min(6500, id(core2_light_kelvin) + 250);
+          } else if (touch.x >= 10 && touch.x < 310 && ty >= 198 && ty < 230) {
+            id(core2_light_kelvin) = 1500 + (touch.x - 10) * 5000 / 299;
             id(core2_set_light_kelvin)->execute();
+          } else if (touch.x >= 94 && touch.x < 310 && ty >= 42 && ty < 90) {
+            id(core2_light_brightness) = std::max(0, std::min(100, (touch.x - 100) * 100 / 200));
+            id(core2_set_light_brightness)->execute();
           }
           id(core2_display)->update();
 
@@ -92,6 +128,7 @@ binary_sensor:
           }
           id(core2_active_light_entity) = id(core2_light_entities)[id(core2_light_index)];
       - component.update: core2_display
+      - script.execute: core2_refresh_light_state
 
   - platform: touchscreen
     id: core2_button_b
@@ -137,4 +174,5 @@ binary_sensor:
           }
           id(core2_active_light_entity) = id(core2_light_entities)[id(core2_light_index)];
       - component.update: core2_display
+      - script.execute: core2_refresh_light_state
 
