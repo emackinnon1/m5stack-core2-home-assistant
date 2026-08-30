@@ -36,4 +36,5 @@ packages:
   idle: !include src/main/idle.yaml
   lights_backend: !include src/main/lights.yaml
   lights_ui: !include src/pages/light_selector.yaml
+  menu_ui: !include src/pages/menu.yaml
 
