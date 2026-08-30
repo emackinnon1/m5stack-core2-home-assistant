@@ -55,26 +55,38 @@ text_sensor:
     id: core2_light1_state
     entity_id: ${core2_light1_entity}
     internal: true
+    on_value:
+      - script.execute: core2_refresh_light_widgets
   - platform: homeassistant
     id: core2_light2_state
     entity_id: ${core2_light2_entity}
     internal: true
+    on_value:
+      - script.execute: core2_refresh_light_widgets
   - platform: homeassistant
     id: core2_light3_state
     entity_id: ${core2_light3_entity}
     internal: true
+    on_value:
+      - script.execute: core2_refresh_light_widgets
   - platform: homeassistant
     id: core2_light4_state
     entity_id: ${core2_light4_entity}
     internal: true
+    on_value:
+      - script.execute: core2_refresh_light_widgets
   - platform: homeassistant
     id: core2_light5_state
     entity_id: ${core2_light5_entity}
     internal: true
+    on_value:
+      - script.execute: core2_refresh_light_widgets
   - platform: homeassistant
     id: core2_light6_state
     entity_id: ${core2_light6_entity}
     internal: true
+    on_value:
+      - script.execute: core2_refresh_light_widgets
 
 sensor:
   - platform: homeassistant
@@ -172,5 +184,5 @@ script:
           variables:
             target_entity: !lambda 'return id(core2_active_light_entity);'
       - delay: 300ms
-      - component.update: core2_display
+      - script.execute: core2_refresh_light_widgets
 

@@ -67,6 +67,33 @@ lvgl:
   default_font: roboto_small
   theme:
     dark_mode: true
+  gradients:
+    - id: core2_hue_gradient
+      direction: HOR
+      stops:
+        - color: 0xFF0000
+          position: 0
+        - color: 0xFFFF00
+          position: 42
+        - color: 0x00FF00
+          position: 84
+        - color: 0x00FFFF
+          position: 127
+        - color: 0x0000FF
+          position: 169
+        - color: 0xFF00FF
+          position: 212
+        - color: 0xFF0000
+          position: 255
+    - id: core2_kelvin_gradient
+      direction: HOR
+      stops:
+        - color: 0xFF7E2A
+          position: 0
+        - color: 0xFFD090
+          position: 127
+        - color: 0xBCE8FF
+          position: 255
   pages:
     - id: core2_menu_page
       bg_color: 0x000000
@@ -163,6 +190,8 @@ lvgl:
                   text_color: 0xFFFFFF
     - id: core2_lights_page
       bg_color: 0x000000
+      on_load:
+        - script.execute: core2_refresh_light_widgets
       widgets:
         - button:
             x: 6
@@ -181,10 +210,288 @@ lvgl:
             text: Lights
             text_font: roboto
             text_color: 0xFFFFFF
+        - container:
+            x: 0
+            y: 32
+            width: 320
+            height: 208
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scroll_dir: VER
+            scrollbar_mode: "AUTO"
+            widgets:
+              - button:
+                  x: 10
+                  y: 4
+                  width: 300
+                  height: 33
+                  hidden: !lambda 'return id(core2_light_names)[0].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 0}
+                  widgets:
+                    - label:
+                        id: core2_light1_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[0];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light1_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return id(core2_light1_state).state == "on" ? "ON" : "OFF";'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 41
+                  width: 300
+                  height: 33
+                  hidden: !lambda 'return id(core2_light_names)[1].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 1}
+                  widgets:
+                    - label:
+                        id: core2_light2_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[1];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light2_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return id(core2_light2_state).state == "on" ? "ON" : "OFF";'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 78
+                  width: 300
+                  height: 33
+                  hidden: !lambda 'return id(core2_light_names)[2].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 2}
+                  widgets:
+                    - label:
+                        id: core2_light3_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[2];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light3_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return id(core2_light3_state).state == "on" ? "ON" : "OFF";'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 115
+                  width: 300
+                  height: 33
+                  hidden: !lambda 'return id(core2_light_names)[3].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 3}
+                  widgets:
+                    - label:
+                        id: core2_light4_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[3];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light4_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return id(core2_light4_state).state == "on" ? "ON" : "OFF";'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 152
+                  width: 300
+                  height: 33
+                  hidden: !lambda 'return id(core2_light_names)[4].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 4}
+                  widgets:
+                    - label:
+                        id: core2_light5_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[4];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light5_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return id(core2_light5_state).state == "on" ? "ON" : "OFF";'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 189
+                  width: 300
+                  height: 33
+                  hidden: !lambda 'return id(core2_light_names)[5].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 5}
+                  widgets:
+                    - label:
+                        id: core2_light6_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[5];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light6_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return id(core2_light6_state).state == "on" ? "ON" : "OFF";'
+                        text_color: 0xAFAFAF
+    - id: core2_light_detail_page
+      bg_color: 0x000000
+      on_load:
+        - script.execute: core2_refresh_light_widgets
+      widgets:
+        - button:
+            x: 6
+            y: 4
+            width: 28
+            height: 28
+            text: "<"
+            text_font: roboto
+            bg_opa: TRANSP
+            border_width: 0
+            on_click:
+              - lvgl.page.show: core2_lights_page
         - label:
-            align: CENTER
-            text: Light list coming next
+            id: core2_detail_title
+            x: 38
+            y: 5
+            width: 200
+            long_mode: DOT
+            text: !lambda 'return id(core2_light_names)[id(core2_light_index)];'
+            text_font: roboto
+            text_color: 0xFFFFFF
+        - button:
+            x: 10
+            y: 42
+            width: 72
+            height: 48
+            text: Power
+            on_click:
+              - lambda: |-
+                  const int index = id(core2_light_index);
+                  const bool is_on = index == 0 ? id(core2_light1_state).state == "on" :
+                                     index == 1 ? id(core2_light2_state).state == "on" :
+                                     index == 2 ? id(core2_light3_state).state == "on" :
+                                     index == 3 ? id(core2_light4_state).state == "on" :
+                                     index == 4 ? id(core2_light5_state).state == "on" :
+                                                  id(core2_light6_state).state == "on";
+                  if (is_on) id(core2_turn_off_light).execute(); else id(core2_turn_on_light).execute();
+        - label:
+            x: 100
+            y: 43
+            text: Brightness
+            text_font: roboto
             text_color: 0xAFAFAF
+        - slider:
+            id: core2_brightness_slider
+            x: 100
+            y: 76
+            width: 200
+            height: 12
+            min_value: 0
+            max_value: 100
+            value: !lambda 'return id(core2_light_brightness);'
+            on_release:
+              - lambda: 'id(core2_light_brightness) = x;'
+              - script.execute: core2_set_light_brightness
+        - label:
+            x: 10
+            y: 100
+            text: Color
+            text_font: roboto
+            text_color: 0xAFAFAF
+        - slider:
+            id: core2_hue_slider
+            x: 10
+            y: 130
+            width: 300
+            height: 32
+            min_value: 0
+            max_value: 359
+            value: !lambda 'return id(core2_light_hue);'
+            bg_grad: core2_hue_gradient
+            indicator:
+              bg_opa: TRANSP
+            on_release:
+              - lambda: |-
+                  const int hue = x;
+                  const int segment = hue / 60;
+                  const int fade = hue % 60 * 255 / 59;
+                  const int inverse = 255 - fade;
+                  id(core2_light_hue) = hue;
+                  id(core2_light_red) = segment == 0 || segment == 5 ? 255 : (segment == 1 ? inverse : (segment == 4 ? fade : 0));
+                  id(core2_light_green) = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
+                  id(core2_light_blue) = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
+              - script.execute: core2_set_light_color
+        - label:
+            x: 10
+            y: 166
+            text: Kelvin
+            text_font: roboto
+            text_color: 0xAFAFAF
+        - slider:
+            id: core2_kelvin_slider
+            x: 10
+            y: 198
+            width: 300
+            height: 32
+            min_value: 1500
+            max_value: 6500
+            value: !lambda 'return id(core2_light_kelvin);'
+            bg_grad: core2_kelvin_gradient
+            indicator:
+              bg_opa: TRANSP
+            on_release:
+              - lambda: 'id(core2_light_kelvin) = x;'
+              - script.execute: core2_set_light_kelvin
     - id: core2_climate_page
       bg_color: 0x000000
       widgets:

@@ -1,29 +1,11 @@
-# Light selector (scrollable list) + individual light detail state.
-# Rendering/touch handling for these lives in menu.yaml (single owner of
-# core2_display/core2_touchscreen), dispatched on core2_page: 0 = selector
-# list, 1 = single-light detail.
+# Light selector state. Its LVGL widgets live in menu.yaml, which owns the
+# single LVGL configuration.
 
 globals:
   - id: core2_page
     type: int
     restore_value: false
     initial_value: '0'
-  - id: core2_selector_scroll_y
-    type: int
-    restore_value: false
-    initial_value: '0'
-  - id: core2_selector_touch_start_y
-    type: int
-    restore_value: false
-    initial_value: '-1'
-  - id: core2_selector_touch_start_scroll
-    type: int
-    restore_value: false
-    initial_value: '0'
-  - id: core2_selector_drag_moved
-    type: bool
-    restore_value: false
-    initial_value: 'false'
 
 script:
   - id: core2_open_light_detail
@@ -35,4 +17,25 @@ script:
           id(core2_active_light_entity) = id(core2_light_entities)[index];
           id(core2_page) = 1;
       - script.execute: core2_refresh_light_state
-      - component.update: core2_display
+      - lvgl.page.show: core2_light_detail_page
+
+  - id: core2_refresh_light_widgets
+    then:
+      - lvgl.widget.refresh:
+          id:
+            - core2_light1_name_label
+            - core2_light1_state_label
+            - core2_light2_name_label
+            - core2_light2_state_label
+            - core2_light3_name_label
+            - core2_light3_state_label
+            - core2_light4_name_label
+            - core2_light4_state_label
+            - core2_light5_name_label
+            - core2_light5_state_label
+            - core2_light6_name_label
+            - core2_light6_state_label
+            - core2_detail_title
+            - core2_brightness_slider
+            - core2_hue_slider
+            - core2_kelvin_slider
