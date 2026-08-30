@@ -25,6 +25,9 @@ font:
   - file: "gfonts://Roboto"
     id: roboto
     size: 24
+  - file: "gfonts://Roboto"
+    id: roboto_small
+    size: 16
 
 image:
   - platform: file

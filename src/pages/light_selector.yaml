@@ -99,13 +99,13 @@ display:
           const Color accent = is_on ? Color(255, 196, 60) : Color(105, 105, 110);
           it.filled_rectangle(10, row_y + 4, 300, ROW_H - 8, row_bg);
           it.rectangle(10, row_y + 4, 300, ROW_H - 8, accent);
-          it.print(24, row_y + 8, id(roboto), Color(255, 255, 255), id(core2_light_names)[i].c_str());
+          it.print(24, row_y + 6, id(roboto_small), Color(255, 255, 255), id(core2_light_names)[i].c_str());
 
           if (is_on && !isnan(bright_raw)) {
             const int pct = (int) (bright_raw * 100.0f / 255.0f + 0.5f);
-            it.printf(24, row_y + 30, id(roboto), Color(175, 175, 175), "ON  %d%%", pct);
+            it.printf(24, row_y + 28, id(roboto_small), Color(175, 175, 175), "ON  %d%%", pct);
           } else {
-            it.print(24, row_y + 30, id(roboto), Color(175, 175, 175), is_on ? "ON" : "OFF");
+            it.print(24, row_y + 28, id(roboto_small), Color(175, 175, 175), is_on ? "ON" : "OFF");
           }
         }
 
