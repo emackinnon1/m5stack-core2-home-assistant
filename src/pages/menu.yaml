@@ -30,7 +30,7 @@ image:
     transparency: alpha_channel
     resize: 34x34
   - platform: file
-    file: src/assets/images/weather.png
+    file: src/assets/images/cloudy.png
     id: core2_menu_icon_weather
     type: RGB565
     transparency: alpha_channel
