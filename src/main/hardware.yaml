@@ -25,9 +25,11 @@ font:
   - file: "gfonts://Roboto"
     id: roboto
     size: 24
+    bpp: 4
   - file: "gfonts://Roboto"
     id: roboto_small
     size: 16
+    bpp: 4
 
 image:
   - platform: file
@@ -53,8 +55,8 @@ display:
   - platform: mipi_spi
     id: core2_display
     model: M5CORE2
-    lambda: |-
-      it.print(10, 10, id(roboto), "Loading...");
+    auto_clear_enabled: false
+    update_interval: never
 
 touchscreen:
   - platform: ft63x6
