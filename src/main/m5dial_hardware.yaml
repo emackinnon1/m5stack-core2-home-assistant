@@ -1,0 +1,169 @@
+i2c:
+  - id: internal_i2c
+    sda: GPIO11
+    scl: GPIO12
+  - id: external_i2c
+    sda: GPIO13
+    scl: GPIO15
+
+rc522_i2c:
+  - id: nfc_reader
+    i2c_id: internal_i2c
+    address: 0x28
+
+switch:
+  # M5Dial V1.1 battery power hold. GPIO46 must stay HIGH after WAKE,
+  # otherwise the device immediately returns to sleep on battery-only power.
+  - platform: gpio
+    pin: GPIO46
+    id: power_hold
+    internal: true
+    restore_mode: ALWAYS_ON
+
+output:
+  - platform: ledc
+    pin: GPIO3
+    id: buzzer
+  - platform: ledc
+    pin: GPIO9
+    id: backlight_output
+
+rtttl:
+  output: buzzer
+
+spi:
+  id: spi_bus
+  mosi_pin: GPIO5
+  clk_pin: GPIO6
+
+# sensor:
+#   - platform: mpu6886
+#     i2c_id: internal_i2c
+#     address: 0x68
+#     accel_x:
+#       name: "MPU6886 Accel X"
+#     accel_y:
+#       name: "MPU6886 Accel Y"
+#     accel_z:
+#       name: "MPU6886 Accel Z"
+#     gyro_x:
+#       name: "MPU6886 Gyro X"
+#     gyro_y:
+#       name: "MPU6886 Gyro Y"
+#     gyro_z:
+#       name: "MPU6886 Gyro Z"
+#     temperature:
+#       name: "MPU6886 Temperature"
+
+display:
+  - platform: mipi_spi
+    id: round_display
+    model: GC9A01A
+    cs_pin: GPIO7
+    reset_pin: GPIO8
+    dc_pin: GPIO4
+    invert_colors: true
+    data_rate: 40MHz
+    update_interval: never
+    auto_clear_enabled: false
+
+globals:
+  - id: swipe_start_x
+    type: int
+    initial_value: '-1'
+  - id: swipe_cur_x
+    type: int
+    initial_value: '0'
+  - id: swipe_start_y
+    type: int
+    initial_value: '0'
+  - id: swipe_cur_y
+    type: int
+    initial_value: '0'
+  - id: swipe_gesture_handled
+    type: bool
+    initial_value: 'false'
+
+touchscreen:
+  - platform: ft5x06
+    id: touch
+    i2c_id: internal_i2c
+    address: 0x38
+    interrupt_pin: GPIO14
+    on_touch:
+      - script.execute:
+          id: dial_register_activity
+          source: "touch"
+      - lambda: |-
+          if (id(idle_event_consumed)) {
+            id(idle_touch_sequence_consumed) = true;
+            id(swipe_gesture_handled) = true;
+            id(swipe_start_x) = -1;
+            id(dial_idle_block_lvgl_input).execute();
+            return;
+          }
+          if (id(swipe_start_x) < 0) {
+            id(swipe_start_x) = touch.x;
+            id(swipe_start_y) = touch.y;
+            id(swipe_gesture_handled) = false;
+            ESP_LOGI("swipe", "SWIPE start x=%d y=%d", touch.x, touch.y);
+          }
+          id(swipe_cur_x) = touch.x;
+          id(swipe_cur_y) = touch.y;
+    on_update:
+      - lambda: |-
+          if (id(idle_touch_sequence_consumed)) return;
+          if (id(swipe_start_x) < 0 || touches.empty()) return;
+          const auto &touch = touches[0];
+          id(swipe_cur_x) = touch.x;
+          id(swipe_cur_y) = touch.y;
+    on_release:
+      - lambda: |-
+          if (id(idle_touch_sequence_consumed)) {
+            id(swipe_start_x) = -1;
+            id(swipe_cur_x) = 0;
+            id(swipe_cur_y) = 0;
+            id(swipe_gesture_handled) = true;
+            id(idle_touch_sequence_consumed) = false;
+            id(idle_event_consumed) = false;
+            id(dial_idle_unblock_lvgl_input).execute();
+            return;
+          }
+          if (id(swipe_start_x) < 0) {
+            ESP_LOGI("swipe", "SWIPE ignored reason=no_start");
+            return;
+          }
+          if (id(swipe_gesture_handled)) {
+            ESP_LOGI("swipe", "SWIPE ignored reason=already_handled");
+            return;
+          }
+          const int dx = id(swipe_cur_x) - id(swipe_start_x);
+          const int dy = id(swipe_cur_y) - id(swipe_start_y);
+          ESP_LOGI("swipe", "SWIPE end x=%d y=%d dx=%d dy=%d",
+                   id(swipe_cur_x), id(swipe_cur_y), dx, dy);
+          id(swipe_start_x) = -1;
+          // A normal tap is left to LVGL and its widget-specific handler.
+          // Only a clearly horizontal drag is considered navigation.
+          if (abs(dx) < 50) {
+            ESP_LOGI("swipe", "SWIPE ignored reason=horizontal_distance");
+            return;
+          }
+          if (abs(dy) >= abs(dx)) {
+            ESP_LOGI("swipe", "SWIPE ignored reason=not_horizontal");
+            return;
+          }
+          id(swipe_gesture_handled) = true;
+          if (dx < 0) {
+            ESP_LOGI("swipe", "SWIPE dispatch direction=left");
+            id(dial_gesture_left).execute();
+          } else {
+            ESP_LOGI("swipe", "SWIPE dispatch direction=right");
+            id(dial_gesture_right).execute();
+          }
+
+light:
+  - platform: monochromatic
+    name: "Backlight"
+    output: backlight_output
+    id: display_backlight
+    restore_mode: ALWAYS_ON
