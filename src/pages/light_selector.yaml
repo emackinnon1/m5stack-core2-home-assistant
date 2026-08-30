@@ -21,21 +21,19 @@ script:
 
   - id: core2_refresh_light_widgets
     then:
-      - lvgl.widget.refresh:
-          id:
-            - core2_light1_name_label
-            - core2_light1_state_label
-            - core2_light2_name_label
-            - core2_light2_state_label
-            - core2_light3_name_label
-            - core2_light3_state_label
-            - core2_light4_name_label
-            - core2_light4_state_label
-            - core2_light5_name_label
-            - core2_light5_state_label
-            - core2_light6_name_label
-            - core2_light6_state_label
-            - core2_detail_title
-            - core2_brightness_slider
-            - core2_hue_slider
-            - core2_kelvin_slider
+      - lvgl.widget.refresh: core2_light1_name_label
+      - lvgl.widget.refresh: core2_light1_state_label
+      - lvgl.widget.refresh: core2_light2_name_label
+      - lvgl.widget.refresh: core2_light2_state_label
+      - lvgl.widget.refresh: core2_light3_name_label
+      - lvgl.widget.refresh: core2_light3_state_label
+      - lvgl.widget.refresh: core2_light4_name_label
+      - lvgl.widget.refresh: core2_light4_state_label
+      - lvgl.widget.refresh: core2_light5_name_label
+      - lvgl.widget.refresh: core2_light5_state_label
+      - lvgl.widget.refresh: core2_light6_name_label
+      - lvgl.widget.refresh: core2_light6_state_label
+      - lvgl.widget.refresh: core2_detail_title
+      - lvgl.widget.refresh: core2_brightness_slider
+      - lvgl.widget.refresh: core2_hue_slider
+      - lvgl.widget.refresh: core2_kelvin_slider
