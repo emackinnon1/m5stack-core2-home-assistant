@@ -57,6 +57,10 @@ touchscreen:
   - platform: ft63x6
     id: core2_touchscreen
     interrupt_pin: GPIO39
+    on_touch:
+      - script.execute:
+          id: core2_register_activity
+          source: "touch"
 
 time:
   - platform: bm8563
