@@ -1,0 +1,170 @@
+# Screen idle management: dim then backlight-off after inactivity.
+# States: 0=ACTIVE, 1=DIMMED, 2=OFF
+# off_ms must be >= dim_ms when both are enabled; the AXP192 only exposes
+# set_brightness()/update(), so "off" is the dimmest available backlight step.
+
+globals:
+  # 0=ACTIVE, 1=DIMMED, 2=OFF
+  - id: screen_idle_state
+    type: int
+    initial_value: '0'
+  - id: last_activity_ms
+    type: uint32_t
+    initial_value: '0'
+  - id: screen_normal_brightness_value
+    type: float
+    initial_value: '1.0'
+  - id: screen_dim_brightness_value
+    type: float
+    initial_value: '0.2'
+  - id: screen_dim_timeout_ms
+    type: uint32_t
+    initial_value: '0'
+  - id: screen_off_timeout_ms
+    type: uint32_t
+    initial_value: '0'
+  - id: idle_config_ready
+    type: bool
+    initial_value: 'false'
+
+script:
+  - id: core2_idle_init
+    then:
+      - lambda: |-
+          auto parse_time_ms = [](const char *raw) -> uint32_t {
+            if (raw == nullptr || raw[0] == '\0') return 0;
+            int value = 0;
+            const char *p = raw;
+            while (*p != '\0' && (*p < '0' || *p > '9')) p++;
+            while (*p >= '0' && *p <= '9') {
+              value = value * 10 + (*p - '0');
+              p++;
+            }
+            while (*p == ' ') p++;
+            if (*p == '\0' || strcmp(p, "s") == 0 || strcmp(p, "sec") == 0 || strcmp(p, "secs") == 0)
+              return (uint32_t) value * 1000UL;
+            if (strncmp(p, "min", 3) == 0) return (uint32_t) value * 60000UL;
+            if (*p == 'h') return (uint32_t) value * 3600000UL;
+            return (uint32_t) value * 1000UL;
+          };
+
+          auto parse_brightness = [](const char *raw, float fallback_pct) -> float {
+            if (raw == nullptr || raw[0] == '\0') return fallback_pct / 100.0f;
+            int pct = 0;
+            const char *p = raw;
+            while (*p != '\0' && (*p < '0' || *p > '9')) p++;
+            while (*p >= '0' && *p <= '9') {
+              pct = pct * 10 + (*p - '0');
+              p++;
+            }
+            if (pct < 1) pct = 1;
+            if (pct > 100) pct = 100;
+            return pct / 100.0f;
+          };
+
+          uint32_t dim_ms = parse_time_ms("${screen_dim_timeout}");
+          uint32_t off_ms = parse_time_ms("${screen_off_timeout}");
+
+          if (off_ms > 0 && dim_ms > 0 && off_ms < dim_ms) {
+            ESP_LOGW("idle", "Invalid config: screen_off_timeout below screen_dim_timeout; raising off to %us",
+                     (unsigned) (dim_ms / 1000));
+            off_ms = dim_ms;
+          }
+
+          id(screen_dim_timeout_ms) = dim_ms;
+          id(screen_off_timeout_ms) = off_ms;
+          id(screen_normal_brightness_value) = parse_brightness("${screen_normal_brightness}", 100.0f);
+          id(screen_dim_brightness_value) = parse_brightness("${screen_dim_brightness}", 20.0f);
+
+          id(screen_idle_state) = 0;
+          id(last_activity_ms) = millis();
+          id(idle_config_ready) = true;
+
+          const int dim_pct = (int) (id(screen_dim_brightness_value) * 100.0f + 0.5f);
+          ESP_LOGI("idle", "[IDLE] config dim_ms=%u off_ms=%u dim=%d%%",
+                   (unsigned) dim_ms, (unsigned) off_ms, dim_pct);
+
+  - id: core2_idle_set_brightness
+    parameters:
+      brightness: float
+    then:
+      - lambda: |-
+          id(axp192_id).set_brightness(brightness);
+          id(axp192_id).update();
+
+  - id: core2_idle_dim
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screen_idle_state) == 0;'
+          then:
+            - script.execute:
+                id: core2_idle_set_brightness
+                brightness: !lambda 'return id(screen_dim_brightness_value);'
+            - lambda: 'id(screen_idle_state) = 1;'
+
+  - id: core2_idle_off
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screen_idle_state) != 2;'
+          then:
+            - script.execute:
+                id: core2_idle_set_brightness
+                brightness: '0.0'
+            - lambda: 'id(screen_idle_state) = 2;'
+
+  - id: core2_idle_wake
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screen_idle_state) != 0;'
+          then:
+            - script.execute:
+                id: core2_idle_set_brightness
+                brightness: !lambda 'return id(screen_normal_brightness_value);'
+            - lambda: |-
+                id(screen_idle_state) = 0;
+                id(last_activity_ms) = millis();
+
+  - id: core2_register_activity
+    parameters:
+      source: string
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screen_idle_state) != 0;'
+          then:
+            - lambda: 'ESP_LOGI("idle", "[IDLE] wake source=%s", source.c_str());'
+            - script.execute: core2_idle_wake
+          else:
+            - lambda: 'id(last_activity_ms) = millis();'
+
+  - id: core2_idle_tick
+    then:
+      - lambda: |-
+          if (!id(idle_config_ready)) return;
+
+          const uint32_t elapsed = millis() - id(last_activity_ms);
+          const uint32_t dim_ms = id(screen_dim_timeout_ms);
+          const uint32_t off_ms = id(screen_off_timeout_ms);
+          const int idle_state = id(screen_idle_state);
+
+          if (off_ms > 0 && elapsed >= off_ms && idle_state != 2) {
+            id(core2_idle_off).execute();
+            return;
+          }
+          if (dim_ms > 0 && elapsed >= dim_ms && idle_state == 0) {
+            id(core2_idle_dim).execute();
+          }
+
+interval:
+  - interval: 1s
+    then:
+      - script.execute: core2_idle_tick
+
+esphome:
+  on_boot:
+    - priority: -50
+      then:
+        - script.execute: core2_idle_init
