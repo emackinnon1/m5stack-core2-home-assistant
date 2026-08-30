@@ -11,26 +11,22 @@ globals:
     initial_value: '0'
 
 image:
-  - platform: file
-    file: src/assets/images/bulb.png
+  - file: src/assets/images/bulb.png
     id: core2_menu_icon_lights
     type: RGB565
     transparency: alpha_channel
     resize: 34x34
-  - platform: file
-    file: src/assets/images/ac_logo.png
+  - file: src/assets/images/ac_logo.png
     id: core2_menu_icon_climate
     type: RGB565
     transparency: alpha_channel
     resize: 32x32
-  - platform: file
-    file: src/assets/images/music.png
+  - file: src/assets/images/music.png
     id: core2_menu_icon_media
     type: RGB565
     transparency: alpha_channel
     resize: 34x34
-  - platform: file
-    file: src/assets/images/cloudy.png
+  - file: src/assets/images/cloudy.png
     id: core2_menu_icon_weather
     type: RGB565
     transparency: alpha_channel
