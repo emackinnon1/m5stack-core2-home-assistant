@@ -35,5 +35,5 @@ packages:
   network: !include src/main/network.yaml
   idle: !include src/main/idle.yaml
   lights_backend: !include src/main/lights.yaml
-  lights_ui: !include src/pages/lights.yaml
+  lights_ui: !include src/pages/light_selector.yaml
 
