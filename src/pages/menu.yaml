@@ -1,0 +1,516 @@
+# Main menu + screen dispatch. ESPHome's `!extend` replaces a component's whole
+# lambda/trigger set, so this file owns core2_display/core2_touchscreen/the
+# capacitive buttons entirely; core2_screen picks which "page" renders.
+# 0 = menu, 1 = lights (see light_selector.yaml for its core2_page sub-state),
+# 2 = climate, 3 = media, 4 = weather (2-4 are stub placeholders for now).
+
+globals:
+  - id: core2_screen
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+image:
+  - platform: file
+    file: src/assets/images/bulb.png
+    id: core2_menu_icon_lights
+    type: RGB565
+    transparency: alpha_channel
+    resize: 34x34
+  - platform: file
+    file: src/assets/images/ac_logo.png
+    id: core2_menu_icon_climate
+    type: RGB565
+    transparency: alpha_channel
+    resize: 32x32
+  - platform: file
+    file: src/assets/images/music.png
+    id: core2_menu_icon_media
+    type: RGB565
+    transparency: alpha_channel
+    resize: 34x34
+  - platform: file
+    file: src/assets/images/cloudy.png
+    id: core2_menu_icon_weather
+    type: RGB565
+    transparency: alpha_channel
+    resize: 34x34
+
+script:
+  - id: core2_open_menu
+    then:
+      - globals.set: {id: core2_screen, value: '0'}
+      - component.update: core2_display
+
+  - id: core2_open_lights
+    then:
+      - globals.set: {id: core2_screen, value: '1'}
+      - globals.set: {id: core2_page, value: '0'}
+      - component.update: core2_display
+
+  - id: core2_open_climate
+    then:
+      - globals.set: {id: core2_screen, value: '2'}
+      - component.update: core2_display
+
+  - id: core2_open_media
+    then:
+      - globals.set: {id: core2_screen, value: '3'}
+      - component.update: core2_display
+
+  - id: core2_open_weather
+    then:
+      - globals.set: {id: core2_screen, value: '4'}
+      - component.update: core2_display
+
+  - id: core2_back_to_menu
+    then:
+      - globals.set: {id: core2_screen, value: '0'}
+      - component.update: core2_display
+
+display:
+  - id: !extend core2_display
+    lambda: |-
+      static const int HEADER_H = 32;
+      static const int ROW_H = 41;
+
+      it.fill(Color(0, 0, 0));
+      it.filled_rectangle(0, 0, 320, HEADER_H, Color(28, 28, 32));
+
+      const int screen = id(core2_screen);
+      std::string header_title;
+      switch (screen) {
+        case 0: {
+          header_title = "Menu";
+          break;
+        }
+        case 1: {
+          int index = id(core2_light_index);
+          const bool has_index = index >= 0 && index < 6 && !id(core2_light_names)[index].empty();
+          header_title = id(core2_page) == 0 ? "Lights" :
+                          (has_index ? id(core2_light_names)[index] : "No lights configured");
+          break;
+        }
+        case 2: header_title = "Climate"; break;
+        case 3: header_title = "Media"; break;
+        default: header_title = "Weather"; break;
+      }
+
+      const bool show_back = screen != 0;
+      int title_x = 10;
+      if (show_back) {
+        it.print(10, 4, id(roboto), Color(200, 200, 200), "<");
+        title_x = 30;
+      }
+      it.print(title_x, 4, id(roboto), Color(255, 255, 255), header_title.c_str());
+
+      it.rectangle(240, 10, 14, 10, Color(175, 175, 175));
+      it.filled_rectangle(254, 13, 3, 4, Color(175, 175, 175));
+      if (!isnan(id(core2_battery_level).state)) {
+        int battery_fill = std::max(1, std::min(11, (int) (id(core2_battery_level).state * 11 / 100)));
+        it.filled_rectangle(241, 11, battery_fill, 8, Color(255, 196, 60));
+      }
+      if (isnan(id(core2_battery_level).state)) {
+        it.print(270, 4, id(roboto), Color(175, 175, 175), "--%");
+      } else {
+        it.printf(260, 4, id(roboto), Color(175, 175, 175), "%.0f%%", id(core2_battery_level).state);
+      }
+
+      if (screen == 0) {
+        struct Tile { int x, y; const char *label; };
+        static const int TILE_W = 145;
+        static const int TILE_H = 88;
+        Tile tiles[4] = {
+          {10, 40, "Lights"}, {165, 40, "Climate"},
+          {10, 136, "Media"}, {165, 136, "Weather"},
+        };
+        for (int i = 0; i < 4; i++) {
+          it.filled_rectangle(tiles[i].x, tiles[i].y, TILE_W, TILE_H, Color(28, 28, 32));
+          it.rectangle(tiles[i].x, tiles[i].y, TILE_W, TILE_H, Color(105, 105, 110));
+        }
+        it.image(tiles[0].x + 55, tiles[0].y + 14, id(core2_menu_icon_lights));
+        it.image(tiles[1].x + 56, tiles[1].y + 16, id(core2_menu_icon_climate));
+        it.image(tiles[2].x + 55, tiles[2].y + 14, id(core2_menu_icon_media));
+        it.image(tiles[3].x + 55, tiles[3].y + 14, id(core2_menu_icon_weather));
+        it.print(tiles[0].x + TILE_W / 2, tiles[0].y + 56, id(roboto_small), Color(255, 255, 255),
+                 TextAlign::TOP_CENTER, tiles[0].label);
+        it.print(tiles[1].x + TILE_W / 2, tiles[1].y + 56, id(roboto_small), Color(255, 255, 255),
+                 TextAlign::TOP_CENTER, tiles[1].label);
+        it.print(tiles[2].x + TILE_W / 2, tiles[2].y + 56, id(roboto_small), Color(255, 255, 255),
+                 TextAlign::TOP_CENTER, tiles[2].label);
+        it.print(tiles[3].x + TILE_W / 2, tiles[3].y + 56, id(roboto_small), Color(255, 255, 255),
+                 TextAlign::TOP_CENTER, tiles[3].label);
+        return;
+      }
+
+      if (screen >= 2) {
+        it.print(160, 120, id(roboto), Color(175, 175, 175), TextAlign::CENTER, "Coming soon");
+        return;
+      }
+
+      if (id(core2_page) == 0) {
+        int visible_count = 0;
+        for (int i = 0; i < 6; i++) if (!id(core2_light_names)[i].empty()) visible_count++;
+        if (visible_count == 0) return;
+
+        const int view_h = 240 - HEADER_H;
+        const int content_h = visible_count * ROW_H;
+        const int max_scroll = std::max(0, content_h - view_h);
+        if (id(core2_selector_scroll_y) > max_scroll) id(core2_selector_scroll_y) = max_scroll;
+        if (id(core2_selector_scroll_y) < 0) id(core2_selector_scroll_y) = 0;
+
+        int slot = 0;
+        for (int i = 0; i < 6; i++) {
+          if (id(core2_light_names)[i].empty()) continue;
+          const int row_y = HEADER_H + slot * ROW_H - id(core2_selector_scroll_y);
+          slot++;
+          if (row_y + ROW_H < HEADER_H || row_y > 240) continue;
+
+          const bool is_on = i == 0 ? id(core2_light1_state).state == "on" :
+                              i == 1 ? id(core2_light2_state).state == "on" :
+                              i == 2 ? id(core2_light3_state).state == "on" :
+                              i == 3 ? id(core2_light4_state).state == "on" :
+                              i == 4 ? id(core2_light5_state).state == "on" :
+                                       id(core2_light6_state).state == "on";
+          const float bright_raw = i == 0 ? id(core2_light1_brightness).state :
+                                    i == 1 ? id(core2_light2_brightness).state :
+                                    i == 2 ? id(core2_light3_brightness).state :
+                                    i == 3 ? id(core2_light4_brightness).state :
+                                    i == 4 ? id(core2_light5_brightness).state :
+                                             id(core2_light6_brightness).state;
+
+          const Color row_bg = is_on ? Color(82, 60, 22) : Color(28, 28, 32);
+          const Color accent = is_on ? Color(255, 196, 60) : Color(105, 105, 110);
+          it.filled_rectangle(10, row_y + 4, 300, ROW_H - 8, row_bg);
+          it.rectangle(10, row_y + 4, 300, ROW_H - 8, accent);
+          it.print(24, row_y + 8, id(roboto_small), Color(255, 255, 255), id(core2_light_names)[i].c_str());
+
+          if (is_on && !isnan(bright_raw)) {
+            const int pct = (int) (bright_raw * 100.0f / 255.0f + 0.5f);
+            it.printf(296, row_y + 8, id(roboto_small), Color(175, 175, 175), TextAlign::TOP_RIGHT, "ON  %d%%", pct);
+          } else {
+            it.print(296, row_y + 8, id(roboto_small), Color(175, 175, 175), TextAlign::TOP_RIGHT, is_on ? "ON" : "OFF");
+          }
+        }
+
+        if (max_scroll > 0) {
+          const int track_h = view_h - 8;
+          const int thumb_h = std::max(16, track_h * view_h / content_h);
+          const int thumb_y = HEADER_H + 4 + (track_h - thumb_h) * id(core2_selector_scroll_y) / max_scroll;
+          it.filled_rectangle(314, thumb_y, 4, thumb_h, Color(105, 105, 110));
+        }
+        return;
+      }
+
+      int index = id(core2_light_index);
+      const bool has_index = index >= 0 && index < 6 && !id(core2_light_names)[index].empty();
+      if (!has_index) return;
+
+      const bool is_on = index == 0 ? id(core2_light1_state).state == "on" :
+                          index == 1 ? id(core2_light2_state).state == "on" :
+                          index == 2 ? id(core2_light3_state).state == "on" :
+                          index == 3 ? id(core2_light4_state).state == "on" :
+                          index == 4 ? id(core2_light5_state).state == "on" :
+                                       id(core2_light6_state).state == "on";
+      Color accent = is_on ? Color(255, 196, 60) : Color(95, 95, 95);
+
+      it.filled_rectangle(13, 45, 72, 48, Color(16, 16, 18));
+      it.filled_rectangle(10, 42, 72, 48, is_on ? Color(82, 60, 22) : Color(48, 48, 52));
+      it.rectangle(10, 42, 72, 48, is_on ? Color(255, 196, 60) : Color(105, 105, 110));
+      it.image(28, 48, id(core2_light_power_icon));
+      it.printf(100, 43, id(roboto), Color(175, 175, 175), "BRIGHT %d%%", id(core2_light_brightness));
+      it.filled_rectangle(100, 76, 200, 8, Color(48, 48, 52));
+      it.filled_rectangle(100, 76, id(core2_light_brightness) * 200 / 100, 8, accent);
+      int brightness_x = 100 + id(core2_light_brightness) * 200 / 100;
+      it.filled_circle(brightness_x, 80, 7, Color(255, 255, 255));
+
+      it.print(10, 100, id(roboto), Color(175, 175, 175), "COLOR");
+      for (int x = 0; x < 300; x++) {
+        int hue = x * 359 / 299;
+        int segment = hue / 60;
+        int fade = hue % 60 * 255 / 59;
+        int inverse = 255 - fade;
+        int red = segment == 0 || segment == 5 ? 255 : (segment == 1 ? inverse : (segment == 4 ? fade : 0));
+        int green = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
+        int blue = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
+        it.filled_rectangle(10 + x, 130, 1, 32, Color(red, green, blue));
+      }
+      int marker_x = 10 + id(core2_light_hue) * 299 / 359;
+      it.rectangle(marker_x - 2, 128, 5, 36, Color(255, 255, 255));
+
+      it.printf(10, 166, id(roboto), Color(175, 175, 175), "KELVIN  %dK", id(core2_light_kelvin));
+      for (int x = 0; x < 300; x++) {
+        int coolness = x * 255 / 299;
+        int red = 255 - coolness * 65 / 255;
+        int green = 126 + coolness * 94 / 255;
+        int blue = 42 + coolness * 213 / 255;
+        it.filled_rectangle(10 + x, 198, 1, 32, Color(red, green, blue));
+      }
+      int kelvin_marker_x = 10 + (id(core2_light_kelvin) - 1500) * 299 / 5000;
+      it.rectangle(kelvin_marker_x - 2, 196, 5, 36, Color(255, 255, 255));
+
+touchscreen:
+  - id: !extend core2_touchscreen
+    on_touch:
+      - lambda: |-
+          if (id(core2_screen) != 0 && touch.x >= 0 && touch.x < 40 && touch.y >= 0 && touch.y < 32) {
+            if (id(core2_screen) == 1 && id(core2_page) == 1) {
+              id(core2_page) = 0;
+            } else {
+              id(core2_screen) = 0;
+            }
+            id(core2_display)->update();
+            return;
+          }
+          if (id(core2_screen) != 1) return;
+
+          if (id(core2_page) == 0) {
+            if (id(core2_selector_touch_start_y) < 0) {
+              id(core2_selector_touch_start_y) = touch.y;
+              id(core2_selector_touch_start_scroll) = id(core2_selector_scroll_y);
+              id(core2_selector_drag_moved) = false;
+            }
+            return;
+          }
+
+          int index = id(core2_light_index);
+          if (index < 0 || index >= 6 || id(core2_light_names)[index].empty()) return;
+          id(core2_active_light_entity) = id(core2_light_entities)[index];
+          int ty = touch.y;
+          if (ty < 0 || ty >= 240) return;
+          if (touch.x >= 10 && touch.x < 82 && ty >= 42 && ty < 90) {
+            if (index == 0 ? id(core2_light1_state).state == "on" :
+                index == 1 ? id(core2_light2_state).state == "on" :
+                index == 2 ? id(core2_light3_state).state == "on" :
+                index == 3 ? id(core2_light4_state).state == "on" :
+                index == 4 ? id(core2_light5_state).state == "on" :
+                             id(core2_light6_state).state == "on") {
+              id(core2_turn_off_light).execute();
+            } else {
+              id(core2_turn_on_light).execute();
+            }
+          } else if (touch.x >= 10 && touch.x < 310 && ty >= 130 && ty < 162) {
+            int hue = (touch.x - 10) * 359 / 299;
+            int segment = hue / 60;
+            int fade = hue % 60 * 255 / 59;
+            int inverse = 255 - fade;
+            id(core2_light_hue) = hue;
+            id(core2_light_red) = segment == 0 || segment == 5 ? 255 : (segment == 1 ? inverse : (segment == 4 ? fade : 0));
+            id(core2_light_green) = segment == 1 || segment == 2 ? 255 : (segment == 0 ? fade : (segment == 3 ? inverse : 0));
+            id(core2_light_blue) = segment == 3 || segment == 4 ? 255 : (segment == 2 ? fade : (segment == 5 ? inverse : 0));
+            id(core2_set_light_color).execute();
+          } else if (touch.x >= 10 && touch.x < 310 && ty >= 198 && ty < 230) {
+            id(core2_light_kelvin) = 1500 + (touch.x - 10) * 5000 / 299;
+            id(core2_set_light_kelvin).execute();
+          } else if (touch.x >= 94 && touch.x < 310 && ty >= 42 && ty < 90) {
+            id(core2_light_brightness) = std::max(0, std::min(100, (touch.x - 100) * 100 / 200));
+            id(core2_set_light_brightness).execute();
+          }
+          id(core2_display)->update();
+    on_update:
+      - lambda: |-
+          if (id(core2_screen) != 1 || id(core2_page) != 0) return;
+          if (id(core2_selector_touch_start_y) < 0 || touches.empty()) return;
+
+          const auto &t = touches[0];
+          const int delta = id(core2_selector_touch_start_y) - t.y;
+          if (abs(delta) > 6) id(core2_selector_drag_moved) = true;
+
+          int visible_count = 0;
+          for (int i = 0; i < 6; i++) if (!id(core2_light_names)[i].empty()) visible_count++;
+          const int content_h = visible_count * 41;
+          const int max_scroll = std::max(0, content_h - (240 - 32));
+
+          int new_scroll = id(core2_selector_touch_start_scroll) + delta;
+          if (new_scroll < 0) new_scroll = 0;
+          if (new_scroll > max_scroll) new_scroll = max_scroll;
+          id(core2_selector_scroll_y) = new_scroll;
+          id(core2_display)->update();
+    on_release:
+      - lambda: |-
+          if (id(core2_screen) != 1) return;
+          if (id(core2_page) != 0) {
+            id(core2_selector_touch_start_y) = -1;
+            return;
+          }
+          if (id(core2_selector_touch_start_y) < 0) return;
+
+          if (!id(core2_selector_drag_moved)) {
+            const int content_y = id(core2_selector_touch_start_y) + id(core2_selector_scroll_y) - 32;
+            if (content_y >= 0) {
+              const int row_slot = content_y / 41;
+              int slot = 0;
+              for (int i = 0; i < 6; i++) {
+                if (id(core2_light_names)[i].empty()) continue;
+                if (slot == row_slot) {
+                  id(core2_open_light_detail).execute(i);
+                  break;
+                }
+                slot++;
+              }
+            }
+          }
+          id(core2_selector_touch_start_y) = -1;
+
+# menu grid tap zones (only active on the menu screen)
+binary_sensor:
+  - platform: touchscreen
+    id: core2_menu_tile_lights
+    internal: true
+    x_min: 10
+    x_max: 155
+    y_min: 40
+    y_max: 128
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(core2_screen) == 0;'
+          then:
+            - script.execute: core2_open_lights
+
+  - platform: touchscreen
+    id: core2_menu_tile_climate
+    internal: true
+    x_min: 165
+    x_max: 310
+    y_min: 40
+    y_max: 128
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(core2_screen) == 0;'
+          then:
+            - script.execute: core2_open_climate
+
+  - platform: touchscreen
+    id: core2_menu_tile_media
+    internal: true
+    x_min: 10
+    x_max: 155
+    y_min: 136
+    y_max: 224
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(core2_screen) == 0;'
+          then:
+            - script.execute: core2_open_media
+
+  - platform: touchscreen
+    id: core2_menu_tile_weather
+    internal: true
+    x_min: 165
+    x_max: 310
+    y_min: 136
+    y_max: 224
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(core2_screen) == 0;'
+          then:
+            - script.execute: core2_open_weather
+
+  # virtual buttons in the capacitive strip below the visible screen
+  - platform: touchscreen
+    id: core2_button_a
+    internal: true
+    x_min: 10
+    x_max: 120
+    y_min: 240
+    y_max: 280
+    use_raw: true
+    on_press:
+      - lambda: |-
+          if (id(core2_screen) == 1) {
+            if (id(core2_page) == 0) {
+              int new_scroll = id(core2_selector_scroll_y) - 41;
+              if (new_scroll < 0) new_scroll = 0;
+              id(core2_selector_scroll_y) = new_scroll;
+            } else {
+              id(core2_page) = 0;
+            }
+          } else if (id(core2_screen) >= 2) {
+            id(core2_screen) = 0;
+          } else {
+            return;
+          }
+      - component.update: core2_display
+
+  - platform: touchscreen
+    id: core2_button_b
+    internal: true
+    x_min: 130
+    x_max: 200
+    y_min: 240
+    y_max: 280
+    use_raw: true
+    on_press:
+      - lambda: |-
+          if (id(core2_screen) != 1) {
+            if (id(core2_screen) >= 2) id(core2_screen) = 0;
+            return;
+          }
+          if (id(core2_page) == 0) {
+            int visible_count = 0;
+            for (int i = 0; i < 6; i++) if (!id(core2_light_names)[i].empty()) visible_count++;
+            if (visible_count == 0) return;
+            const int row_slot = id(core2_selector_scroll_y) / 41;
+            int slot = 0;
+            for (int i = 0; i < 6; i++) {
+              if (id(core2_light_names)[i].empty()) continue;
+              if (slot == row_slot) {
+                id(core2_active_light_entity) = id(core2_light_entities)[i];
+                const bool is_on = i == 0 ? id(core2_light1_state).state == "on" :
+                                    i == 1 ? id(core2_light2_state).state == "on" :
+                                    i == 2 ? id(core2_light3_state).state == "on" :
+                                    i == 3 ? id(core2_light4_state).state == "on" :
+                                    i == 4 ? id(core2_light5_state).state == "on" :
+                                             id(core2_light6_state).state == "on";
+                if (is_on) id(core2_turn_off_light).execute(); else id(core2_turn_on_light).execute();
+                break;
+              }
+              slot++;
+            }
+          } else {
+            int idx = id(core2_light_index);
+            if (idx < 0 || idx >= 6 || id(core2_light_names)[idx].empty()) return;
+            id(core2_active_light_entity) = id(core2_light_entities)[idx];
+            if (idx == 0 ? id(core2_light1_state).state == "on" :
+                idx == 1 ? id(core2_light2_state).state == "on" :
+                idx == 2 ? id(core2_light3_state).state == "on" :
+                idx == 3 ? id(core2_light4_state).state == "on" :
+                idx == 4 ? id(core2_light5_state).state == "on" :
+                           id(core2_light6_state).state == "on") {
+              id(core2_turn_off_light).execute();
+            } else {
+              id(core2_turn_on_light).execute();
+            }
+          }
+
+  - platform: touchscreen
+    id: core2_button_c
+    internal: true
+    x_min: 230
+    x_max: 310
+    y_min: 240
+    y_max: 280
+    use_raw: true
+    on_press:
+      - lambda: |-
+          if (id(core2_screen) == 1) {
+            if (id(core2_page) == 0) {
+              int visible_count = 0;
+              for (int i = 0; i < 6; i++) if (!id(core2_light_names)[i].empty()) visible_count++;
+              const int max_scroll = std::max(0, visible_count * 41 - (240 - 32));
+              int new_scroll = id(core2_selector_scroll_y) + 41;
+              if (new_scroll > max_scroll) new_scroll = max_scroll;
+              id(core2_selector_scroll_y) = new_scroll;
+            } else {
+              id(core2_page) = 0;
+            }
+          } else if (id(core2_screen) >= 2) {
+            id(core2_screen) = 0;
+          } else {
+            return;
+          }
+      - component.update: core2_display
