@@ -76,6 +76,38 @@ text_sensor:
     entity_id: ${core2_light6_entity}
     internal: true
 
+sensor:
+  - platform: homeassistant
+    id: core2_light1_brightness
+    entity_id: ${core2_light1_entity}
+    attribute: brightness
+    internal: true
+  - platform: homeassistant
+    id: core2_light2_brightness
+    entity_id: ${core2_light2_entity}
+    attribute: brightness
+    internal: true
+  - platform: homeassistant
+    id: core2_light3_brightness
+    entity_id: ${core2_light3_entity}
+    attribute: brightness
+    internal: true
+  - platform: homeassistant
+    id: core2_light4_brightness
+    entity_id: ${core2_light4_entity}
+    attribute: brightness
+    internal: true
+  - platform: homeassistant
+    id: core2_light5_brightness
+    entity_id: ${core2_light5_entity}
+    attribute: brightness
+    internal: true
+  - platform: homeassistant
+    id: core2_light6_brightness
+    entity_id: ${core2_light6_entity}
+    attribute: brightness
+    internal: true
+
 script:
   - id: core2_turn_on_light
     then:
