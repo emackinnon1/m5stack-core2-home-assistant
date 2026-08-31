@@ -409,11 +409,21 @@ lvgl:
             text_font: roboto
             text_color: 0xFFFFFF
         - button:
+            id: core2_power_button
             x: 10
             y: 42
             width: 72
             height: 48
             text: Power
+            bg_color: !lambda |-
+              const int index = id(core2_light_index);
+              const bool is_on = index == 0 ? id(core2_light1_state).state == "on" :
+                                 index == 1 ? id(core2_light2_state).state == "on" :
+                                 index == 2 ? id(core2_light3_state).state == "on" :
+                                 index == 3 ? id(core2_light4_state).state == "on" :
+                                 index == 4 ? id(core2_light5_state).state == "on" :
+                                              id(core2_light6_state).state == "on";
+              return lv_color_hex(is_on ? 0xFFC43C : 0x5F5F5F);
             on_click:
               - lambda: |-
                   const int index = id(core2_light_index);

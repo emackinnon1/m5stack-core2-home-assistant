@@ -34,6 +34,7 @@ script:
       - lvgl.widget.refresh: core2_light6_name_label
       - lvgl.widget.refresh: core2_light6_state_label
       - lvgl.widget.refresh: core2_detail_title
+      - lvgl.widget.refresh: core2_power_button
       - lvgl.widget.refresh: core2_brightness_slider
       - lvgl.widget.refresh: core2_hue_slider
       - lvgl.widget.refresh: core2_kelvin_slider
