@@ -538,18 +538,18 @@ lvgl:
         - label:
             id: core2_climate_target_temp_label
             x: 10
-            y: 30
+            y: 32
             text: !lambda |-
               char buf[16];
               snprintf(buf, sizeof(buf), "%d\xc2\xb0", (int) id(core2_climate_target_temp));
               return std::string(buf);
-            text_font: roboto
+            text_font: roboto_large
             text_color: 0xFFFFFF
         - button:
             x: 10
-            y: 68
-            width: 36
-            height: 32
+            y: 92
+            width: 40
+            height: 36
             text: "-"
             text_font: roboto
             bg_color: 0x1C1C20
@@ -558,10 +558,10 @@ lvgl:
             on_click:
               - script.execute: core2_climate_decrease_temp
         - button:
-            x: 50
-            y: 68
-            width: 36
-            height: 32
+            x: 58
+            y: 92
+            width: 40
+            height: 36
             text: "+"
             text_font: roboto
             bg_color: 0x1C1C20
@@ -570,14 +570,14 @@ lvgl:
             on_click:
               - script.execute: core2_climate_increase_temp
         - label:
-            x: 10
-            y: 112
+            x: 40
+            y: 136
             text: Mode
             text_color: 0xAFAFAF
         - button:
             id: core2_climate_hvac_prev_button
-            x: 64
-            y: 108
+            x: 104
+            y: 132
             width: 28
             height: 28
             text: "<"
@@ -590,16 +590,16 @@ lvgl:
               - script.execute: core2_climate_prev_hvac_mode
         - label:
             id: core2_climate_hvac_label
-            x: 96
-            y: 112
-            width: 132
+            x: 136
+            y: 136
+            width: 116
             text_align: CENTER
             text: !lambda 'return id(core2_climate_state).state;'
             text_color: 0xFFFFFF
         - button:
             id: core2_climate_hvac_next_button
-            x: 230
-            y: 108
+            x: 256
+            y: 132
             width: 28
             height: 28
             text: ">"
@@ -611,14 +611,14 @@ lvgl:
             on_click:
               - script.execute: core2_climate_next_hvac_mode
         - label:
-            x: 10
-            y: 150
+            x: 40
+            y: 174
             text: Fan
             text_color: 0xAFAFAF
         - button:
             id: core2_climate_fan_prev_button
-            x: 64
-            y: 146
+            x: 104
+            y: 170
             width: 28
             height: 28
             text: "<"
@@ -631,16 +631,16 @@ lvgl:
               - script.execute: core2_climate_prev_fan_mode
         - label:
             id: core2_climate_fan_mode_label
-            x: 96
-            y: 150
-            width: 132
+            x: 136
+            y: 174
+            width: 116
             text_align: CENTER
             text: !lambda 'return id(core2_climate_fan_mode).state;'
             text_color: 0xFFFFFF
         - button:
             id: core2_climate_fan_next_button
-            x: 230
-            y: 146
+            x: 256
+            y: 170
             width: 28
             height: 28
             text: ">"
@@ -652,14 +652,14 @@ lvgl:
             on_click:
               - script.execute: core2_climate_next_fan_mode
         - label:
-            x: 10
-            y: 188
+            x: 40
+            y: 212
             text: Preset
             text_color: 0xAFAFAF
         - button:
             id: core2_climate_preset_prev_button
-            x: 64
-            y: 184
+            x: 104
+            y: 208
             width: 28
             height: 28
             text: "<"
@@ -672,16 +672,16 @@ lvgl:
               - script.execute: core2_climate_prev_preset_mode
         - label:
             id: core2_climate_preset_mode_label
-            x: 96
-            y: 188
-            width: 132
+            x: 136
+            y: 212
+            width: 116
             text_align: CENTER
             text: !lambda 'return id(core2_climate_preset_mode).state;'
             text_color: 0xFFFFFF
         - button:
             id: core2_climate_preset_next_button
-            x: 230
-            y: 184
+            x: 256
+            y: 208
             width: 28
             height: 28
             text: ">"

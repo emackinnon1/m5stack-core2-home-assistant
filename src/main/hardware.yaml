@@ -30,6 +30,10 @@ font:
     id: roboto_small
     size: 16
     bpp: 4
+  - file: "gfonts://Roboto"
+    id: roboto_large
+    size: 48
+    bpp: 4
 
 image:
   - platform: file
