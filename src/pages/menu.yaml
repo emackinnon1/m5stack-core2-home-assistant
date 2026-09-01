@@ -552,6 +552,8 @@ lvgl:
             height: 36
             text: "-"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
@@ -564,6 +566,8 @@ lvgl:
             height: 36
             text: "+"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
@@ -582,6 +586,8 @@ lvgl:
             height: 28
             text: "<"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
@@ -604,6 +610,8 @@ lvgl:
             height: 28
             text: ">"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
@@ -623,6 +631,8 @@ lvgl:
             height: 28
             text: "<"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
@@ -645,6 +655,8 @@ lvgl:
             height: 28
             text: ">"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
@@ -664,6 +676,8 @@ lvgl:
             height: 28
             text: "<"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
@@ -686,6 +700,8 @@ lvgl:
             height: 28
             text: ">"
             text_font: roboto
+            text_align: CENTER
+            pad_all: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
