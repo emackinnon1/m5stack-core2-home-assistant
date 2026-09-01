@@ -587,7 +587,7 @@ lvgl:
             text: "<"
             text_font: roboto
             text_align: CENTER
-            pad_right: -2
+            pad_right: -1
             pad_top: -1
             bg_color: 0x1C1C20
             border_width: 1
@@ -612,7 +612,7 @@ lvgl:
             text: ">"
             text_font: roboto
             text_align: CENTER
-            pad_right: -2
+            pad_right: -1
             pad_top: -1
             bg_color: 0x1C1C20
             border_width: 1
@@ -634,7 +634,7 @@ lvgl:
             text: "<"
             text_font: roboto
             text_align: CENTER
-            pad_right: -2
+            pad_right: -1
             pad_top: -1
             bg_color: 0x1C1C20
             border_width: 1
@@ -659,7 +659,7 @@ lvgl:
             text: ">"
             text_font: roboto
             text_align: CENTER
-            pad_right: -2
+            pad_right: -1
             pad_top: -1
             bg_color: 0x1C1C20
             border_width: 1
@@ -681,7 +681,7 @@ lvgl:
             text: "<"
             text_font: roboto
             text_align: CENTER
-            pad_right: -2
+            pad_right: -1
             pad_top: -1
             bg_color: 0x1C1C20
             border_width: 1
@@ -706,7 +706,7 @@ lvgl:
             text: ">"
             text_font: roboto
             text_align: CENTER
-            pad_right: -2
+            pad_right: -1
             pad_top: -1
             bg_color: 0x1C1C20
             border_width: 1
