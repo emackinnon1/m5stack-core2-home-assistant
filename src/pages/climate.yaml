@@ -74,8 +74,24 @@ text_sensor:
     internal: true
     on_value:
       - lambda: |-
-          // HA sends the list attribute as its string repr, e.g. "['off', 'heat', 'cool']".
+          // HA sends the list attribute as its string repr. Plain-string lists look like
+          // "['off', 'heat', 'cool']", but enum-backed lists (e.g. hvac_modes) can repr as
+          // "[<HVACMode.OFF: 'off'>, <HVACMode.HEAT: 'heat'>]" - pull the value from the
+          // last quoted segment of each token so both formats work.
           ESP_LOGD("climate_ui", "hvac_modes raw: '%s'", x.c_str());
+          auto extract_value = [](const std::string &token) -> std::string {
+            const size_t close_quote = token.find_last_of("'\"");
+            if (close_quote != std::string::npos && close_quote > 0) {
+              const char quote_char = token[close_quote];
+              const size_t open_quote = token.find_last_of(quote_char, close_quote - 1);
+              if (open_quote != std::string::npos && open_quote < close_quote) {
+                return token.substr(open_quote + 1, close_quote - open_quote - 1);
+              }
+            }
+            const size_t start = token.find_first_not_of(" '\"");
+            const size_t end = token.find_last_not_of(" '\"");
+            return (start == std::string::npos) ? "" : token.substr(start, end - start + 1);
+          };
           std::string inner = x;
           const size_t open_bracket = inner.find('[');
           const size_t close_bracket = inner.find(']');
@@ -87,10 +103,9 @@ text_sensor:
           while (pos <= inner.length() && count < 8) {
             const size_t comma = inner.find(',', pos);
             const std::string token = (comma == std::string::npos) ? inner.substr(pos) : inner.substr(pos, comma - pos);
-            const size_t start = token.find_first_not_of(" '\"");
-            const size_t end = token.find_last_not_of(" '\"");
-            if (start != std::string::npos) {
-              id(core2_climate_hvac_modes)[count] = token.substr(start, end - start + 1);
+            const std::string value = extract_value(token);
+            if (!value.empty()) {
+              id(core2_climate_hvac_modes)[count] = value;
               ESP_LOGD("climate_ui", "hvac_modes[%d] = '%s'", count, id(core2_climate_hvac_modes)[count].c_str());
               count++;
             }
