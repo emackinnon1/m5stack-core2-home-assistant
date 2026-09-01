@@ -534,7 +534,10 @@ lvgl:
             id: core2_climate_current_temp_label
             x: 10
             y: 54
-            text: !lambda 'return "Currently: " + std::to_string((int) id(core2_climate_current_temperature).state) + "\xc2\xb0";'
+            text: !lambda |-
+              char buf[32];
+              snprintf(buf, sizeof(buf), "Currently: %d\xc2\xb0", (int) id(core2_climate_current_temperature).state);
+              return std::string(buf);
             text_font: roboto
             text_color: 0xAFAFAF
         - button:
@@ -555,7 +558,10 @@ lvgl:
             y: 96
             width: 168
             text_align: CENTER
-            text: !lambda 'return std::to_string((int) id(core2_climate_target_temp)) + "\xc2\xb0";'
+            text: !lambda |-
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%d\xc2\xb0", (int) id(core2_climate_target_temp));
+              return std::string(buf);
             text_font: roboto
             text_color: 0xFFFFFF
         - button:

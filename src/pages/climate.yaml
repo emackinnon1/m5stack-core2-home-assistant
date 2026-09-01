@@ -10,7 +10,7 @@ globals:
   - id: core2_climate_fan_modes
     type: 'std::array<std::string, 8>'
     restore_value: false
-    initial_value: '{}'
+    initial_value: '{"", "", "", "", "", "", "", ""}'
   - id: core2_climate_fan_mode_count
     type: int
     restore_value: false
@@ -23,7 +23,7 @@ globals:
   - id: core2_climate_preset_modes
     type: 'std::array<std::string, 8>'
     restore_value: false
-    initial_value: '{}'
+    initial_value: '{"", "", "", "", "", "", "", ""}'
   - id: core2_climate_preset_mode_count
     type: int
     restore_value: false
