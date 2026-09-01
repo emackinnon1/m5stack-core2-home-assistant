@@ -524,16 +524,46 @@ lvgl:
             text: Climate
             text_font: roboto
             text_color: 0xFFFFFF
+        - button:
+            id: core2_climate_hvac_prev_button
+            x: 10
+            y: 34
+            width: 36
+            height: 28
+            text: "<"
+            text_font: roboto
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_hvac_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_prev_hvac_mode
         - label:
             id: core2_climate_hvac_label
-            x: 38
-            y: 32
+            x: 54
+            y: 40
+            width: 212
+            text_align: CENTER
             text: !lambda 'return id(core2_climate_state).state;'
             text_color: 0xAFAFAF
+        - button:
+            id: core2_climate_hvac_next_button
+            x: 274
+            y: 34
+            width: 36
+            height: 28
+            text: ">"
+            text_font: roboto
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_hvac_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_next_hvac_mode
         - label:
             id: core2_climate_current_temp_label
             x: 10
-            y: 54
+            y: 70
             text: !lambda |-
               char buf[32];
               snprintf(buf, sizeof(buf), "Currently: %d\xc2\xb0", (int) id(core2_climate_current_temperature).state);
@@ -542,7 +572,7 @@ lvgl:
             text_color: 0xAFAFAF
         - button:
             x: 10
-            y: 84
+            y: 94
             width: 56
             height: 40
             text: "-"
@@ -555,7 +585,7 @@ lvgl:
         - label:
             id: core2_climate_target_temp_label
             x: 76
-            y: 96
+            y: 106
             width: 168
             text_align: CENTER
             text: !lambda |-
@@ -566,7 +596,7 @@ lvgl:
             text_color: 0xFFFFFF
         - button:
             x: 254
-            y: 84
+            y: 94
             width: 56
             height: 40
             text: "+"
@@ -578,13 +608,13 @@ lvgl:
               - script.execute: core2_climate_increase_temp
         - label:
             x: 10
-            y: 134
+            y: 146
             text: Fan Mode
             text_color: 0xAFAFAF
         - button:
             id: core2_climate_fan_prev_button
             x: 10
-            y: 152
+            y: 166
             width: 40
             height: 32
             text: "<"
@@ -598,7 +628,7 @@ lvgl:
         - label:
             id: core2_climate_fan_mode_label
             x: 58
-            y: 160
+            y: 174
             width: 204
             text_align: CENTER
             text: !lambda 'return id(core2_climate_fan_mode).state;'
@@ -606,7 +636,7 @@ lvgl:
         - button:
             id: core2_climate_fan_next_button
             x: 270
-            y: 152
+            y: 166
             width: 40
             height: 32
             text: ">"
@@ -620,9 +650,9 @@ lvgl:
         - container:
             id: core2_climate_preset_row
             x: 0
-            y: 194
+            y: 204
             width: 320
-            height: 40
+            height: 36
             bg_opa: TRANSP
             border_width: 0
             pad_all: 0
