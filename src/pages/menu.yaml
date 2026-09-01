@@ -550,7 +550,7 @@ lvgl:
             y: 92
             width: 40
             height: 36
-            text: "-"
+            text: " -"
             text_font: roboto
             text_align: CENTER
             pad_all: 0
@@ -564,7 +564,7 @@ lvgl:
             y: 92
             width: 40
             height: 36
-            text: "+"
+            text: " +"
             text_font: roboto
             text_align: CENTER
             pad_all: 0
