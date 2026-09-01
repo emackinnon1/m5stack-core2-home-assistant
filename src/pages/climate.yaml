@@ -356,5 +356,6 @@ script:
       - lvgl.widget.refresh: core2_climate_fan_mode_label
       - lvgl.widget.refresh: core2_climate_fan_prev_button
       - lvgl.widget.refresh: core2_climate_fan_next_button
-      - lvgl.widget.refresh: core2_climate_preset_row
       - lvgl.widget.refresh: core2_climate_preset_mode_label
+      - lvgl.widget.refresh: core2_climate_preset_prev_button
+      - lvgl.widget.refresh: core2_climate_preset_next_button
