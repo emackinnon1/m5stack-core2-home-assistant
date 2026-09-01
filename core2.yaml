@@ -43,6 +43,6 @@ packages:
   idle: !include src/main/idle.yaml
   lights_backend: !include src/main/lights.yaml
   lights_ui: !include src/pages/light_selector.yaml
-  climate_backend: !include src/main/climate.yaml
+  climate_ui: !include src/pages/climate.yaml
   menu_ui: !include src/pages/menu.yaml
 
