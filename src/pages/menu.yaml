@@ -526,7 +526,7 @@ lvgl:
             text_color: 0xFFFFFF
         - label:
             id: core2_climate_target_temp_label
-            x: 160
+            x: 200
             y: 32
             text: !lambda |-
               char buf[16];
@@ -535,7 +535,7 @@ lvgl:
             text_font: roboto_large
             text_color: 0xFFFFFF
         - button:
-            x: 160
+            x: 190
             y: 92
             width: 40
             height: 36
@@ -549,7 +549,7 @@ lvgl:
             on_click:
               - script.execute: core2_climate_decrease_temp
         - button:
-            x: 208
+            x: 238
             y: 92
             width: 40
             height: 36
