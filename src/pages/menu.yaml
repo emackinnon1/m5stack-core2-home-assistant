@@ -532,7 +532,7 @@ lvgl:
             text_align: RIGHT
             text: !lambda |-
               char buf[32];
-              snprintf(buf, sizeof(buf), "Currently: %d\xc2\xb0", (int) id(core2_climate_current_temperature).state);
+              snprintf(buf, sizeof(buf), "ASSHOLE: %d\xc2\xb0", (int) id(core2_climate_current_temperature).state);
               return std::string(buf);
             text_color: 0xAFAFAF
         - label:
