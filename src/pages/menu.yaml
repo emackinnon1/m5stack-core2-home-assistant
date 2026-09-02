@@ -525,17 +525,6 @@ lvgl:
             text_font: roboto
             text_color: 0xFFFFFF
         - label:
-            id: core2_climate_current_temp_label
-            x: 150
-            y: 9
-            width: 160
-            text_align: RIGHT
-            text: !lambda |-
-              char buf[32];
-              snprintf(buf, sizeof(buf), "ASSHOLE: %d\xc2\xb0", (int) id(core2_climate_current_temperature).state);
-              return std::string(buf);
-            text_color: 0xAFAFAF
-        - label:
             id: core2_climate_target_temp_label
             x: 10
             y: 32
