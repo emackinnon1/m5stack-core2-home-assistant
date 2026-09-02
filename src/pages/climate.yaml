@@ -351,7 +351,7 @@ script:
       - lvgl.widget.refresh: core2_climate_hvac_label
       - lvgl.widget.refresh: core2_climate_hvac_prev_button
       - lvgl.widget.refresh: core2_climate_hvac_next_button
-      - lvgl.widget.refresh: core2_climate_current_temp_label
+      # - lvgl.widget.refresh: core2_climate_current_temp_label
       - lvgl.widget.refresh: core2_climate_target_temp_label
       - lvgl.widget.refresh: core2_climate_fan_mode_label
       - lvgl.widget.refresh: core2_climate_fan_prev_button
