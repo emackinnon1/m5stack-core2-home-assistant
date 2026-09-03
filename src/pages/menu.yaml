@@ -573,7 +573,7 @@ lvgl:
             id: core2_climate_hvac_prev_button
             x: 104
             y: 132
-            width: 28
+            width: 36
             height: 28
             text: "<"
             text_font: roboto
@@ -597,7 +597,7 @@ lvgl:
             id: core2_climate_hvac_next_button
             x: 256
             y: 132
-            width: 28
+            width: 36
             height: 28
             text: ">"
             text_font: roboto
@@ -619,7 +619,7 @@ lvgl:
             id: core2_climate_fan_prev_button
             x: 104
             y: 170
-            width: 28
+            width: 36
             height: 28
             text: "<"
             text_font: roboto
@@ -644,7 +644,7 @@ lvgl:
             id: core2_climate_fan_next_button
             x: 256
             y: 170
-            width: 28
+            width: 36
             height: 28
             text: ">"
             text_font: roboto
@@ -666,7 +666,7 @@ lvgl:
             id: core2_climate_preset_prev_button
             x: 104
             y: 208
-            width: 28
+            width: 36
             height: 28
             text: "<"
             text_font: roboto
@@ -691,7 +691,7 @@ lvgl:
             id: core2_climate_preset_next_button
             x: 256
             y: 208
-            width: 28
+            width: 36
             height: 28
             text: ">"
             text_font: roboto
