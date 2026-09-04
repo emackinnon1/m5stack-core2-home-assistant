@@ -512,7 +512,7 @@ lvgl:
             y: 4
             width: 40
             height: 28
-            text: "⬅"
+            text: "◄"
             text_font: roboto
             bg_opa: TRANSP
             border_width: 0
