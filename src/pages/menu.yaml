@@ -512,8 +512,10 @@ lvgl:
             y: 0
             width: 40
             height: 36
-            text: "<<-"
-            text_font: roboto
+            # text: "<<-"
+            # text_font: roboto
+            text: "\uF240 75%"
+            text_font: montserrat_22
             bg_opa: TRANSP
             border_width: 0
             on_click:
