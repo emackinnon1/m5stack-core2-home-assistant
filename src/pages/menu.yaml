@@ -576,13 +576,13 @@ lvgl:
             x: 104
             y: 132
             width: 36
-            height: 28
+            height: 30
             text: "\uF053" # <
             text_font: montserrat_18
             text_align: CENTER
             # pad_all: 0
             pad_right: -1
-            # pad_top: -1
+            pad_top: 0
             bg_color: 0x1C1C20
             border_width: 1
             border_color: 0x69696E
