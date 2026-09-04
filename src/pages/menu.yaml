@@ -577,8 +577,8 @@ lvgl:
             y: 132
             width: 36
             height: 28
-            text: "<"
-            text_font: roboto
+            text: "\uF053"
+            text_font: montserrat_20
             text_align: CENTER
             pad_right: -1
             pad_top: -1
@@ -602,8 +602,8 @@ lvgl:
             y: 132
             width: 36
             height: 28
-            text: ">"
-            text_font: roboto
+            text: "\uF054"
+            text_font: montserrat_20
             text_align: CENTER
             pad_right: -1
             pad_top: -1
