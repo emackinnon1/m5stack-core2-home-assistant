@@ -508,11 +508,11 @@ lvgl:
         - script.execute: core2_refresh_climate_state
       widgets:
         - button:
-            x: 6
-            y: 4
+            x: 0
+            y: 0
             width: 40
-            height: 28
-            text: "◄"
+            height: 36
+            text: "<"
             text_font: roboto
             bg_opa: TRANSP
             border_width: 0
