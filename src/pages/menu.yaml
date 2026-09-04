@@ -514,7 +514,7 @@ lvgl:
             height: 36
             # text: "<<-"
             # text_font: roboto
-            text: "\uF240 75%"
+            text: "\uF8A2 75%"
             text_font: montserrat_22
             bg_opa: TRANSP
             border_width: 0
