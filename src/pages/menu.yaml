@@ -194,10 +194,10 @@ lvgl:
         - script.execute: core2_refresh_light_widgets
       widgets:
         - button:
-            x: 6
-            y: 4
-            width: 28
-            height: 28
+            x: 0
+            y: 0
+            width: 40
+            height: 36
             # text: "<"
             # text_font: roboto
             text: "\uF8A2 75%"
