@@ -521,7 +521,7 @@ lvgl:
             on_click:
               - script.execute: core2_back_to_menu
         - label:
-            x: 45
+            x: 120
             y: 5
             text: Climate
             text_font: roboto
