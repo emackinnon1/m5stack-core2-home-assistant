@@ -255,6 +255,8 @@ lvgl:
                   y: 41
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[1].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -282,6 +284,8 @@ lvgl:
                   y: 78
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[2].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -309,6 +313,8 @@ lvgl:
                   y: 115
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[3].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -336,6 +342,8 @@ lvgl:
                   y: 152
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[4].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -363,6 +371,8 @@ lvgl:
                   y: 189
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[5].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
