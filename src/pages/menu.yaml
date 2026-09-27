@@ -205,7 +205,7 @@ lvgl:
             on_click:
               - script.execute: core2_back_to_menu
         - label:
-            x: 95
+            x: 110
             y: 5
             text: Lights
             text_font: roboto
