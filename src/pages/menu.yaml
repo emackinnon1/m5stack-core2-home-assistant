@@ -198,8 +198,6 @@ lvgl:
             y: 0
             width: 40
             height: 36
-            # text: "<"
-            # text_font: roboto
             text: "\uF8A2 75%"
             text_font: montserrat_22
             bg_opa: TRANSP
@@ -207,7 +205,7 @@ lvgl:
             on_click:
               - script.execute: core2_back_to_menu
         - label:
-            x: 45
+            x: 95
             y: 5
             text: Lights
             text_font: roboto
