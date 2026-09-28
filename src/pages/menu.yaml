@@ -194,18 +194,18 @@ lvgl:
         - script.execute: core2_refresh_light_widgets
       widgets:
         - button:
-            x: 6
-            y: 4
-            width: 28
-            height: 28
-            text: "<"
-            text_font: roboto
+            x: 0
+            y: 0
+            width: 40
+            height: 36
+            text: "\uF8A2 75%"
+            text_font: montserrat_22
             bg_opa: TRANSP
             border_width: 0
             on_click:
               - script.execute: core2_back_to_menu
         - label:
-            x: 38
+            x: 120
             y: 5
             text: Lights
             text_font: roboto
@@ -226,6 +226,8 @@ lvgl:
                   y: 4
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[0].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -253,6 +255,8 @@ lvgl:
                   y: 41
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[1].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -280,6 +284,8 @@ lvgl:
                   y: 78
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[2].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -307,6 +313,8 @@ lvgl:
                   y: 115
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[3].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -334,6 +342,8 @@ lvgl:
                   y: 152
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[4].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -361,6 +371,8 @@ lvgl:
                   y: 189
                   width: 300
                   height: 33
+                  pad_all: 4
+                  pad_top: -2
                   hidden: !lambda 'return id(core2_light_names)[5].empty();'
                   radius: 0
                   bg_color: 0x1C1C20
@@ -504,17 +516,210 @@ lvgl:
               - script.execute: core2_set_light_kelvin
     - id: core2_climate_page
       bg_color: 0x000000
+      on_load:
+        - script.execute: core2_refresh_climate_state
       widgets:
-        - label:
-            align: CENTER
-            text: Climate coming soon
-            text_color: 0xAFAFAF
         - button:
-            align: BOTTOM_MID
-            y: -10
-            text: Menu
+            x: 0
+            y: 0
+            width: 40
+            height: 36
+            # text: "<<-"
+            # text_font: roboto
+            text: "\uF8A2 75%"
+            text_font: montserrat_22
+            bg_opa: TRANSP
+            border_width: 0
             on_click:
               - script.execute: core2_back_to_menu
+        - label:
+            x: 120
+            y: 5
+            text: Climate
+            text_font: roboto
+            text_color: 0xFFFFFF
+        - label:
+            id: core2_climate_target_temp_label
+            x: 200
+            y: 32
+            text: !lambda |-
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%d\xc2\xb0", (int) id(core2_climate_target_temp));
+              return std::string(buf);
+            text_font: roboto_large
+            text_color: 0xFFFFFF
+        - button:
+            x: 190
+            y: 92
+            width: 40
+            height: 36
+            text: "\uF068" # -
+            text_font: montserrat_20
+            text_align: CENTER
+            pad_right: -4
+            pad_bottom: 1
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            on_click:
+              - script.execute: core2_climate_decrease_temp
+        - button:
+            x: 238
+            y: 92
+            width: 40
+            height: 36
+            text: "\uF067"
+            text_font: montserrat_20 # + 
+            text_align: CENTER
+            # pad_right: -4
+            # pad_bottom: 1
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            on_click:
+              - script.execute: core2_climate_increase_temp
+        - label:
+            x: 40
+            y: 136
+            text: Mode
+            text_color: 0xAFAFAF
+        - button:
+            id: core2_climate_hvac_prev_button
+            x: 104
+            y: 132
+            width: 36
+            height: 30
+            text: "\uF053" # <
+            text_font: montserrat_18
+            text_align: CENTER
+            # pad_all: 0
+            pad_right: -1
+            pad_top: 0
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_hvac_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_prev_hvac_mode
+        - label:
+            id: core2_climate_hvac_label
+            x: 136
+            y: 136
+            width: 116
+            text_align: CENTER
+            text: !lambda 'return id(core2_climate_state).state;'
+            text_color: 0xFFFFFF
+        - button:
+            id: core2_climate_hvac_next_button
+            x: 256
+            y: 132
+            width: 36
+            height: 28
+            text: "\uF054"
+            text_font: montserrat_20
+            text_align: CENTER
+            pad_right: -1
+            pad_top: -1
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_hvac_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_next_hvac_mode
+        - label:
+            x: 40
+            y: 174
+            text: Fan
+            text_color: 0xAFAFAF
+        - button:
+            id: core2_climate_fan_prev_button
+            x: 104
+            y: 170
+            width: 36
+            height: 28
+            text: "<"
+            text_font: roboto
+            text_align: CENTER
+            pad_right: -1
+            pad_top: -1
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_fan_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_prev_fan_mode
+        - label:
+            id: core2_climate_fan_mode_label
+            x: 136
+            y: 174
+            width: 116
+            text_align: CENTER
+            text: !lambda 'return id(core2_climate_fan_mode).state;'
+            text_color: 0xFFFFFF
+        - button:
+            id: core2_climate_fan_next_button
+            x: 256
+            y: 170
+            width: 36
+            height: 28
+            text: ">"
+            text_font: roboto
+            text_align: CENTER
+            pad_right: -1
+            pad_top: -1
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_fan_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_next_fan_mode
+        - label:
+            x: 40
+            y: 212
+            text: Preset
+            text_color: 0xAFAFAF
+        - button:
+            id: core2_climate_preset_prev_button
+            x: 104
+            y: 208
+            width: 36
+            height: 28
+            text: "<"
+            text_font: roboto
+            text_align: CENTER
+            pad_right: -1
+            pad_top: -1
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_preset_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_prev_preset_mode
+        - label:
+            id: core2_climate_preset_mode_label
+            x: 136
+            y: 212
+            width: 116
+            text_align: CENTER
+            text: !lambda 'return id(core2_climate_preset_mode).state;'
+            text_color: 0xFFFFFF
+        - button:
+            id: core2_climate_preset_next_button
+            x: 256
+            y: 208
+            width: 36
+            height: 28
+            text: ">"
+            text_font: roboto
+            text_align: CENTER
+            pad_right: -1
+            pad_top: -1
+            bg_color: 0x1C1C20
+            border_width: 1
+            border_color: 0x69696E
+            hidden: !lambda 'return id(core2_climate_preset_mode_count) == 0;'
+            on_click:
+              - script.execute: core2_climate_next_preset_mode
     - id: core2_media_page
       bg_color: 0x000000
       widgets:

@@ -17,6 +17,13 @@ substitutions:
   core2_light6_entity: ${light_entities[5].entity_id if light_entities | length > 5 else "light.core2_unused_6"}
   core2_light6_name: ${light_entities[5].name if light_entities | length > 5 else ""}
 
+  # Single climate entity. fan_modes/preset_modes are discovered on-device
+  # from HA attributes, not configured here.
+  climate_entity: "climate.core2_unused"
+  climate_temp_step: "1.0"
+  climate_temp_min: "60"
+  climate_temp_max: "90"
+
   # Screen idle: dim then near-off backlight after inactivity. Set a timeout
   # to "0s" to disable that stage.
   screen_dim_timeout: "30s"
@@ -36,5 +43,6 @@ packages:
   idle: !include src/main/idle.yaml
   lights_backend: !include src/main/lights.yaml
   lights_ui: !include src/pages/light_selector.yaml
+  climate_ui: !include src/pages/climate.yaml
   menu_ui: !include src/pages/menu.yaml
 

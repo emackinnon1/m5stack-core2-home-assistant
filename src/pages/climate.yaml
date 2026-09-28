@@ -1,0 +1,360 @@
+# Climate backend state. LVGL widgets live in menu.yaml, which owns the
+# single LVGL configuration; this file only owns HA sync + control scripts.
+
+globals:
+  - id: core2_climate_target_temp
+    type: float
+    restore_value: false
+    initial_value: '70.0'
+
+  - id: core2_climate_hvac_modes
+    type: 'std::array<std::string, 8>'
+    restore_value: false
+    initial_value: '{"", "", "", "", "", "", "", ""}'
+  - id: core2_climate_hvac_mode_count
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: core2_climate_hvac_mode_target
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+
+  - id: core2_climate_fan_modes
+    type: 'std::array<std::string, 8>'
+    restore_value: false
+    initial_value: '{"", "", "", "", "", "", "", ""}'
+  - id: core2_climate_fan_mode_count
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: core2_climate_fan_mode_target
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+
+  - id: core2_climate_preset_modes
+    type: 'std::array<std::string, 8>'
+    restore_value: false
+    initial_value: '{"", "", "", "", "", "", "", ""}'
+  - id: core2_climate_preset_mode_count
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: core2_climate_preset_mode_target
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+
+text_sensor:
+  - platform: homeassistant
+    id: core2_climate_state
+    entity_id: ${climate_entity}
+    internal: true
+    on_value:
+      - script.execute: core2_refresh_climate_widgets
+  - platform: homeassistant
+    id: core2_climate_fan_mode
+    entity_id: ${climate_entity}
+    attribute: fan_mode
+    internal: true
+    on_value:
+      - script.execute: core2_refresh_climate_widgets
+  - platform: homeassistant
+    id: core2_climate_preset_mode
+    entity_id: ${climate_entity}
+    attribute: preset_mode
+    internal: true
+    on_value:
+      - script.execute: core2_refresh_climate_widgets
+  - platform: homeassistant
+    id: core2_climate_hvac_modes_raw
+    entity_id: ${climate_entity}
+    attribute: hvac_modes
+    internal: true
+    on_value:
+      - lambda: |-
+          // HA sends the list attribute as its string repr. Plain-string lists look like
+          // "['off', 'heat', 'cool']", but enum-backed lists (e.g. hvac_modes) can repr as
+          // "[<HVACMode.OFF: 'off'>, <HVACMode.HEAT: 'heat'>]" - pull the value from the
+          // last quoted segment of each token so both formats work.
+          ESP_LOGD("climate_ui", "hvac_modes raw: '%s'", x.c_str());
+          auto extract_value = [](const std::string &token) -> std::string {
+            const size_t close_quote = token.find_last_of("'\"");
+            if (close_quote != std::string::npos && close_quote > 0) {
+              const char quote_char = token[close_quote];
+              const size_t open_quote = token.find_last_of(quote_char, close_quote - 1);
+              if (open_quote != std::string::npos && open_quote < close_quote) {
+                return token.substr(open_quote + 1, close_quote - open_quote - 1);
+              }
+            }
+            const size_t start = token.find_first_not_of(" '\"");
+            const size_t end = token.find_last_not_of(" '\"");
+            return (start == std::string::npos) ? "" : token.substr(start, end - start + 1);
+          };
+          std::string inner = x;
+          const size_t open_bracket = inner.find('[');
+          const size_t close_bracket = inner.find(']');
+          if (open_bracket != std::string::npos && close_bracket != std::string::npos) {
+            inner = inner.substr(open_bracket + 1, close_bracket - open_bracket - 1);
+          }
+          int count = 0;
+          size_t pos = 0;
+          while (pos <= inner.length() && count < 8) {
+            const size_t comma = inner.find(',', pos);
+            const std::string token = (comma == std::string::npos) ? inner.substr(pos) : inner.substr(pos, comma - pos);
+            const std::string value = extract_value(token);
+            if (!value.empty()) {
+              id(core2_climate_hvac_modes)[count] = value;
+              ESP_LOGD("climate_ui", "hvac_modes[%d] = '%s'", count, id(core2_climate_hvac_modes)[count].c_str());
+              count++;
+            }
+            if (comma == std::string::npos) break;
+            pos = comma + 1;
+          }
+          id(core2_climate_hvac_mode_count) = count;
+      - script.execute: core2_refresh_climate_widgets
+  - platform: homeassistant
+    id: core2_climate_fan_modes_raw
+    entity_id: ${climate_entity}
+    attribute: fan_modes
+    internal: true
+    on_value:
+      - lambda: |-
+          // HA sends the list attribute as its string repr, e.g. "['auto', 'low', 'high']".
+          ESP_LOGD("climate_ui", "fan_modes raw: '%s'", x.c_str());
+          std::string inner = x;
+          const size_t open_bracket = inner.find('[');
+          const size_t close_bracket = inner.find(']');
+          if (open_bracket != std::string::npos && close_bracket != std::string::npos) {
+            inner = inner.substr(open_bracket + 1, close_bracket - open_bracket - 1);
+          }
+          int count = 0;
+          size_t pos = 0;
+          while (pos <= inner.length() && count < 8) {
+            const size_t comma = inner.find(',', pos);
+            const std::string token = (comma == std::string::npos) ? inner.substr(pos) : inner.substr(pos, comma - pos);
+            const size_t start = token.find_first_not_of(" '\"");
+            const size_t end = token.find_last_not_of(" '\"");
+            if (start != std::string::npos) {
+              id(core2_climate_fan_modes)[count] = token.substr(start, end - start + 1);
+              ESP_LOGD("climate_ui", "fan_modes[%d] = '%s'", count, id(core2_climate_fan_modes)[count].c_str());
+              count++;
+            }
+            if (comma == std::string::npos) break;
+            pos = comma + 1;
+          }
+          id(core2_climate_fan_mode_count) = count;
+      - script.execute: core2_refresh_climate_widgets
+  - platform: homeassistant
+    id: core2_climate_preset_modes_raw
+    entity_id: ${climate_entity}
+    attribute: preset_modes
+    internal: true
+    on_value:
+      - lambda: |-
+          ESP_LOGD("climate_ui", "preset_modes raw: '%s'", x.c_str());
+          std::string inner = x;
+          const size_t open_bracket = inner.find('[');
+          const size_t close_bracket = inner.find(']');
+          if (open_bracket != std::string::npos && close_bracket != std::string::npos) {
+            inner = inner.substr(open_bracket + 1, close_bracket - open_bracket - 1);
+          }
+          int count = 0;
+          size_t pos = 0;
+          while (pos <= inner.length() && count < 8) {
+            const size_t comma = inner.find(',', pos);
+            const std::string token = (comma == std::string::npos) ? inner.substr(pos) : inner.substr(pos, comma - pos);
+            const size_t start = token.find_first_not_of(" '\"");
+            const size_t end = token.find_last_not_of(" '\"");
+            if (start != std::string::npos) {
+              id(core2_climate_preset_modes)[count] = token.substr(start, end - start + 1);
+              ESP_LOGD("climate_ui", "preset_modes[%d] = '%s'", count, id(core2_climate_preset_modes)[count].c_str());
+              count++;
+            }
+            if (comma == std::string::npos) break;
+            pos = comma + 1;
+          }
+          id(core2_climate_preset_mode_count) = count;
+      - script.execute: core2_refresh_climate_widgets
+
+sensor:
+  - platform: homeassistant
+    id: core2_climate_current_temperature
+    entity_id: ${climate_entity}
+    attribute: current_temperature
+    internal: true
+    on_value:
+      - script.execute: core2_refresh_climate_widgets
+  - platform: homeassistant
+    id: core2_climate_target_temperature
+    entity_id: ${climate_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      - lambda: 'id(core2_climate_target_temp) = x;'
+      - script.execute: core2_refresh_climate_widgets
+
+script:
+  - id: core2_set_climate_hvac_mode
+    then:
+      - homeassistant.action:
+          action: climate.set_hvac_mode
+          data_template:
+            entity_id: "${climate_entity}"
+            hvac_mode: "{{ mode }}"
+          variables:
+            mode: !lambda 'return id(core2_climate_hvac_mode_target);'
+
+  - id: core2_climate_next_hvac_mode
+    then:
+      - lambda: |-
+          const int count = id(core2_climate_hvac_mode_count);
+          if (count == 0) return;
+          const std::string current = id(core2_climate_state).state;
+          int index = 0;
+          for (int i = 0; i < count; i++) {
+            if (id(core2_climate_hvac_modes)[i] == current) { index = i; break; }
+          }
+          id(core2_climate_hvac_mode_target) = id(core2_climate_hvac_modes)[(index + 1) % count];
+          ESP_LOGD("climate_ui", "next hvac_mode: current='%s' count=%d index=%d target='%s'", current.c_str(), count, index, id(core2_climate_hvac_mode_target).c_str());
+      - script.execute: core2_set_climate_hvac_mode
+
+  - id: core2_climate_prev_hvac_mode
+    then:
+      - lambda: |-
+          const int count = id(core2_climate_hvac_mode_count);
+          if (count == 0) return;
+          const std::string current = id(core2_climate_state).state;
+          int index = 0;
+          for (int i = 0; i < count; i++) {
+            if (id(core2_climate_hvac_modes)[i] == current) { index = i; break; }
+          }
+          id(core2_climate_hvac_mode_target) = id(core2_climate_hvac_modes)[(index - 1 + count) % count];
+          ESP_LOGD("climate_ui", "prev hvac_mode: current='%s' count=%d index=%d target='%s'", current.c_str(), count, index, id(core2_climate_hvac_mode_target).c_str());
+      - script.execute: core2_set_climate_hvac_mode
+
+  - id: core2_set_climate_temperature
+    then:
+      - homeassistant.action:
+          action: climate.set_temperature
+          data_template:
+            entity_id: "${climate_entity}"
+            temperature: "{{ temp }}"
+          variables:
+            temp: !lambda 'return id(core2_climate_target_temp);'
+
+  - id: core2_climate_increase_temp
+    then:
+      - lambda: |-
+          const float next = id(core2_climate_target_temp) + ${climate_temp_step};
+          id(core2_climate_target_temp) = std::min(next, static_cast<float>(${climate_temp_max}));
+      - script.execute: core2_set_climate_temperature
+      - script.execute: core2_refresh_climate_widgets
+
+  - id: core2_climate_decrease_temp
+    then:
+      - lambda: |-
+          const float next = id(core2_climate_target_temp) - ${climate_temp_step};
+          id(core2_climate_target_temp) = std::max(next, static_cast<float>(${climate_temp_min}));
+      - script.execute: core2_set_climate_temperature
+      - script.execute: core2_refresh_climate_widgets
+
+  - id: core2_set_climate_fan_mode
+    then:
+      - homeassistant.action:
+          action: climate.set_fan_mode
+          data_template:
+            entity_id: "${climate_entity}"
+            fan_mode: "{{ mode }}"
+          variables:
+            mode: !lambda 'return id(core2_climate_fan_mode_target);'
+
+  - id: core2_climate_next_fan_mode
+    then:
+      - lambda: |-
+          const int count = id(core2_climate_fan_mode_count);
+          if (count == 0) return;
+          const std::string current = id(core2_climate_fan_mode).state;
+          int index = 0;
+          for (int i = 0; i < count; i++) {
+            if (id(core2_climate_fan_modes)[i] == current) { index = i; break; }
+          }
+          id(core2_climate_fan_mode_target) = id(core2_climate_fan_modes)[(index + 1) % count];
+          ESP_LOGD("climate_ui", "next fan_mode: current='%s' count=%d index=%d target='%s'", current.c_str(), count, index, id(core2_climate_fan_mode_target).c_str());
+      - script.execute: core2_set_climate_fan_mode
+
+  - id: core2_climate_prev_fan_mode
+    then:
+      - lambda: |-
+          const int count = id(core2_climate_fan_mode_count);
+          if (count == 0) return;
+          const std::string current = id(core2_climate_fan_mode).state;
+          int index = 0;
+          for (int i = 0; i < count; i++) {
+            if (id(core2_climate_fan_modes)[i] == current) { index = i; break; }
+          }
+          id(core2_climate_fan_mode_target) = id(core2_climate_fan_modes)[(index - 1 + count) % count];
+          ESP_LOGD("climate_ui", "prev fan_mode: current='%s' count=%d index=%d target='%s'", current.c_str(), count, index, id(core2_climate_fan_mode_target).c_str());
+      - script.execute: core2_set_climate_fan_mode
+
+  - id: core2_set_climate_preset_mode
+    then:
+      - homeassistant.action:
+          action: climate.set_preset_mode
+          data_template:
+            entity_id: "${climate_entity}"
+            preset_mode: "{{ mode }}"
+          variables:
+            mode: !lambda 'return id(core2_climate_preset_mode_target);'
+
+  - id: core2_climate_next_preset_mode
+    then:
+      - lambda: |-
+          const int count = id(core2_climate_preset_mode_count);
+          if (count == 0) return;
+          const std::string current = id(core2_climate_preset_mode).state;
+          int index = 0;
+          for (int i = 0; i < count; i++) {
+            if (id(core2_climate_preset_modes)[i] == current) { index = i; break; }
+          }
+          id(core2_climate_preset_mode_target) = id(core2_climate_preset_modes)[(index + 1) % count];
+          ESP_LOGD("climate_ui", "next preset_mode: current='%s' count=%d index=%d target='%s'", current.c_str(), count, index, id(core2_climate_preset_mode_target).c_str());
+      - script.execute: core2_set_climate_preset_mode
+
+  - id: core2_climate_prev_preset_mode
+    then:
+      - lambda: |-
+          const int count = id(core2_climate_preset_mode_count);
+          if (count == 0) return;
+          const std::string current = id(core2_climate_preset_mode).state;
+          int index = 0;
+          for (int i = 0; i < count; i++) {
+            if (id(core2_climate_preset_modes)[i] == current) { index = i; break; }
+          }
+          id(core2_climate_preset_mode_target) = id(core2_climate_preset_modes)[(index - 1 + count) % count];
+          ESP_LOGD("climate_ui", "prev preset_mode: current='%s' count=%d index=%d target='%s'", current.c_str(), count, index, id(core2_climate_preset_mode_target).c_str());
+      - script.execute: core2_set_climate_preset_mode
+
+  - id: core2_refresh_climate_state
+    mode: restart
+    then:
+      - homeassistant.action:
+          action: homeassistant.update_entity
+          data_template:
+            entity_id: "${climate_entity}"
+      - delay: 300ms
+      - script.execute: core2_refresh_climate_widgets
+
+  - id: core2_refresh_climate_widgets
+    then:
+      - lvgl.widget.refresh: core2_climate_hvac_label
+      - lvgl.widget.refresh: core2_climate_hvac_prev_button
+      - lvgl.widget.refresh: core2_climate_hvac_next_button
+      - lvgl.widget.refresh: core2_climate_target_temp_label
+      - lvgl.widget.refresh: core2_climate_fan_mode_label
+      - lvgl.widget.refresh: core2_climate_fan_prev_button
+      - lvgl.widget.refresh: core2_climate_fan_next_button
+      - lvgl.widget.refresh: core2_climate_preset_mode_label
+      - lvgl.widget.refresh: core2_climate_preset_prev_button
+      - lvgl.widget.refresh: core2_climate_preset_next_button
