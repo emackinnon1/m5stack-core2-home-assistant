@@ -22,8 +22,12 @@ way over time.
 - [`src/main/lights.yaml`](src/main/lights.yaml) tracks up to six Home
   Assistant light entities (state via `homeassistant` text sensors) and
   exposes a `light.toggle` script for each one.
-- [`src/pages/lights.yaml`](src/pages/lights.yaml) draws the lights list on
-  the screen and wires up the touchscreen and the three virtual buttons.
+- [`src/pages/menu.yaml`](src/pages/menu.yaml) owns the shared LVGL root
+  configuration, the main menu grid and the three virtual buttons.
+- [`src/pages/lights_list.yaml`](src/pages/lights_list.yaml) draws the
+  scrollable lights list reached from the menu.
+- [`src/pages/light_detail.yaml`](src/pages/light_detail.yaml) draws the
+  single-light view with power, brightness, colour and kelvin controls.
 
 ## Quick installation
 
