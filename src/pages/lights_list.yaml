@@ -1,0 +1,240 @@
+# Lights list view. The shared lvgl root config (displays, touchscreens, theme)
+# lives in menu.yaml; packages merge the `pages` list by id.
+
+globals:
+  - id: core2_page
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+script:
+  - id: core2_open_lights
+    then:
+      - globals.set: {id: core2_screen, value: '1'}
+      - globals.set: {id: core2_page, value: '0'}
+      - lvgl.page.show: core2_lights_page
+
+  - id: core2_refresh_lights_list_widgets
+    then:
+      - lvgl.widget.refresh: core2_light1_name_label
+      - lvgl.widget.refresh: core2_light1_state_label
+      - lvgl.widget.refresh: core2_light2_name_label
+      - lvgl.widget.refresh: core2_light2_state_label
+      - lvgl.widget.refresh: core2_light3_name_label
+      - lvgl.widget.refresh: core2_light3_state_label
+      - lvgl.widget.refresh: core2_light4_name_label
+      - lvgl.widget.refresh: core2_light4_state_label
+      - lvgl.widget.refresh: core2_light5_name_label
+      - lvgl.widget.refresh: core2_light5_state_label
+      - lvgl.widget.refresh: core2_light6_name_label
+      - lvgl.widget.refresh: core2_light6_state_label
+
+lvgl:
+  pages:
+    - id: core2_lights_page
+      bg_color: 0x000000
+      on_load:
+        - script.execute: core2_refresh_lights_list_widgets
+      widgets:
+        - button:
+            x: 0
+            y: 0
+            width: 40
+            height: 36
+            text: "\uF8A2 75%"
+            text_font: montserrat_22
+            bg_opa: TRANSP
+            border_width: 0
+            on_click:
+              - script.execute: core2_back_to_menu
+        - label:
+            x: 120
+            y: 5
+            text: Lights
+            text_font: roboto
+            text_color: 0xFFFFFF
+        - container:
+            x: 0
+            y: 32
+            width: 320
+            height: 208
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scroll_dir: VER
+            scrollbar_mode: "AUTO"
+            widgets:
+              - button:
+                  x: 10
+                  y: 4
+                  width: 300
+                  height: 33
+                  pad_all: 4
+                  pad_top: -2
+                  hidden: !lambda 'return id(core2_light_names)[0].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 0}
+                  widgets:
+                    - label:
+                        id: core2_light1_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[0];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light1_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return std::string(id(core2_light1_state).state == "on" ? "ON" : "OFF");'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 41
+                  width: 300
+                  height: 33
+                  pad_all: 4
+                  pad_top: -2
+                  hidden: !lambda 'return id(core2_light_names)[1].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 1}
+                  widgets:
+                    - label:
+                        id: core2_light2_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[1];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light2_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return std::string(id(core2_light2_state).state == "on" ? "ON" : "OFF");'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 78
+                  width: 300
+                  height: 33
+                  pad_all: 4
+                  pad_top: -2
+                  hidden: !lambda 'return id(core2_light_names)[2].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 2}
+                  widgets:
+                    - label:
+                        id: core2_light3_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[2];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light3_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return std::string(id(core2_light3_state).state == "on" ? "ON" : "OFF");'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 115
+                  width: 300
+                  height: 33
+                  pad_all: 4
+                  pad_top: -2
+                  hidden: !lambda 'return id(core2_light_names)[3].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 3}
+                  widgets:
+                    - label:
+                        id: core2_light4_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[3];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light4_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return std::string(id(core2_light4_state).state == "on" ? "ON" : "OFF");'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 152
+                  width: 300
+                  height: 33
+                  pad_all: 4
+                  pad_top: -2
+                  hidden: !lambda 'return id(core2_light_names)[4].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 4}
+                  widgets:
+                    - label:
+                        id: core2_light5_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[4];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light5_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return std::string(id(core2_light5_state).state == "on" ? "ON" : "OFF");'
+                        text_color: 0xAFAFAF
+              - button:
+                  x: 10
+                  y: 189
+                  width: 300
+                  height: 33
+                  pad_all: 4
+                  pad_top: -2
+                  hidden: !lambda 'return id(core2_light_names)[5].empty();'
+                  radius: 0
+                  bg_color: 0x1C1C20
+                  border_width: 1
+                  border_color: 0x69696E
+                  on_click:
+                    - script.execute: {id: core2_open_light_detail, index: 5}
+                  widgets:
+                    - label:
+                        id: core2_light6_name_label
+                        x: 12
+                        y: 7
+                        text: !lambda 'return id(core2_light_names)[5];'
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: core2_light6_state_label
+                        x: 220
+                        y: 7
+                        width: 64
+                        text_align: RIGHT
+                        text: !lambda 'return std::string(id(core2_light6_state).state == "on" ? "ON" : "OFF");'
+                        text_color: 0xAFAFAF
